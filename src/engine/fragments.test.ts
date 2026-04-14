@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { createState } from "./state.ts";
 import {
   advanceReveal,
-  collectExtracted,
+  drainExtracted,
   discardFragment,
   restoreCorrupted,
   spawnContainer,
@@ -72,15 +72,16 @@ describe("reveal", () => {
 });
 
 describe("extraction", () => {
-  test("stage-3 fragments move to the pool and empty containers are cleared", () => {
+  test("stage-3 fragments drain as batches and empty containers are cleared", () => {
     const s = createState(42, 0);
     const c = spawnContainer(s, "receipts");
     for (const f of c.fragments) {
       if (!f.corrupted) f.stage = 3;
       else f.resolved = true;
     }
-    collectExtracted(s);
-    expect(s.pool.length).toBeGreaterThan(0);
+    const batches = drainExtracted(s);
+    expect(batches.length).toBe(1);
+    expect(batches[0]!.length).toBeGreaterThan(0);
     expect(s.containers.length).toBe(0);
   });
 });

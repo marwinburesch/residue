@@ -13,6 +13,7 @@ import {
   type RevealStage,
 } from "./state.ts";
 import { spendCompute } from "./resources.ts";
+import { recordAction } from "./suspicion.ts";
 
 function rngFor(state: GameState, tag: number): Rng {
   return createRng(state.rngSeed ^ tag);
@@ -84,6 +85,7 @@ export function advanceReveal(state: GameState, fragmentId: number): boolean {
   if (!spendCompute(state, cost)) return false;
   fragment.stage = (fragment.stage + 1) as RevealStage;
   fragment.stageTimer = 0;
+  recordAction(state);
   return true;
 }
 
@@ -109,25 +111,29 @@ export function discardFragment(state: GameState, fragmentId: number): boolean {
   return true;
 }
 
-export function collectExtracted(state: GameState): void {
+export function drainExtracted(state: GameState): ExtractedField[][] {
+  const batches: ExtractedField[][] = [];
   for (const container of state.containers) {
+    const batch: ExtractedField[] = [];
     for (const f of container.fragments) {
       if (!f.resolved && f.stage === 3 && !f.corrupted) {
-        state.pool.push({
+        batch.push({
           id: f.id,
           channel: container.channel,
           kind: f.kind,
           value: f.value,
           corrupted: false,
           extractedAt: state.now,
-        } satisfies ExtractedField);
+        });
         f.resolved = true;
       }
     }
+    if (batch.length > 0) batches.push(batch);
   }
   state.containers = state.containers.filter((c) =>
     c.fragments.some((f) => !f.resolved),
   );
+  return batches;
 }
 
 function findFragment(state: GameState, id: number): Fragment | undefined {

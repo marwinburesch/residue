@@ -40,6 +40,22 @@ export type ChannelRuntime = {
   spawnAccumulator: number;
 };
 
+export type ProfileTier = "ghost" | "outline";
+
+export type Profile = {
+  id: number;
+  createdAt: number;
+  fields: Partial<Record<FieldKind, string>>;
+  sources: ChannelId[];
+  tier: ProfileTier;
+};
+
+export type SuspicionState = {
+  level: number;
+  recentActions: number[];
+  warned: boolean;
+};
+
 export type GameState = {
   version: 1;
   now: number;
@@ -52,7 +68,8 @@ export type GameState = {
   nextId: number;
   channels: Record<ChannelId, ChannelRuntime>;
   containers: Container[];
-  pool: ExtractedField[];
+  profiles: Profile[];
+  suspicion: SuspicionState;
 };
 
 export function createState(seed: number, now: number): GameState {
@@ -68,7 +85,8 @@ export function createState(seed: number, now: number): GameState {
     nextId: 1,
     channels: { receipts: { spawnAccumulator: 0 } },
     containers: [],
-    pool: [],
+    profiles: [],
+    suspicion: { level: 0, recentActions: [], warned: false },
   };
 }
 
@@ -77,6 +95,14 @@ export function nextId(state: GameState): number {
 }
 
 export function logInfo(state: GameState, text: string): void {
-  state.log.push({ at: state.now, kind: "info", text });
+  appendLog(state, "info", text);
+}
+
+export function logWarn(state: GameState, text: string): void {
+  appendLog(state, "warn", text);
+}
+
+function appendLog(state: GameState, kind: LogEntry["kind"], text: string): void {
+  state.log.push({ at: state.now, kind, text });
   if (state.log.length > 200) state.log.splice(0, state.log.length - 200);
 }
