@@ -218,13 +218,15 @@ A final log entry, at maximum profile density, reads:
 The game targets the browser with no server dependency.
 
 ```
-Frontend:        Vanilla TypeScript + Vite (fast dev, zero-config bundler)
-State:           Plain JS objects + localStorage autosave (no framework needed)
-Rendering:       DOM manipulation for game UI; CSS transitions for reveal animations
-Scheduling:      setInterval-based tick engine (configurable tick rate, ~250ms)
-Audio:           Web Audio API — generative ambient drone that shifts with stage
-Persistence:     localStorage save/load with JSON serialisation
-Optional:        Canvas for the profile portrait assembly visual
+Runtime/tooling:  Bun (package manager, dev server, bundler, TS runner — no Node required)
+Frontend:         Vanilla TypeScript, bundled via `bun build` and served with `bun --hot`
+State:            Plain JS objects + localStorage autosave (no framework needed)
+Rendering:        DOM manipulation for game UI; CSS transitions for reveal animations
+Scheduling:       setInterval-based tick engine (configurable tick rate, ~250ms)
+Audio:            Web Audio API — generative ambient drone that shifts with stage
+Persistence:      localStorage save/load with JSON serialisation
+Testing:          `bun test` for engine unit tests
+Optional:         Canvas for the profile portrait assembly visual
 ```
 
 ### Module structure
@@ -253,6 +255,61 @@ src/
 
 ---
 
+## Maintainability guidelines
+
+This project will grow for a long time. Codebases rot when files become dumping grounds or when they're split so aggressively that a single change touches a dozen files. The rules below aim for the middle path: **split early, but by meaning — not by line count.**
+
+### Splitting rules
+
+- **One concept per file.** A file owns one system (e.g. the suspicion meter, the reveal state machine, the profile matcher). If you need the word "and" to describe it, split it.
+- **Split when a second reader would need a table of contents.** Rough heuristic: ~200 lines of logic or 3+ exported symbols with distinct responsibilities. Don't split earlier for ceremony; don't wait longer out of inertia.
+- **Do not split by layer alone.** A `types.ts`, `constants.ts`, `utils.ts` trio that mirrors every feature folder is a smell — colocate types and small helpers with the code that uses them. Promote to a shared module only on the second real reuse, not the first.
+- **Data before logic.** Content tables (loot pools, upgrade tree, stage config, copy strings) live in `src/data/` as plain exported objects. Never inline large data literals inside logic files.
+- **UI and engine never import each other's internals.** UI reads engine state through a narrow published surface (selectors/events). Engine never touches the DOM.
+
+### Boundaries that must not blur
+
+```
+data   →  engine  →  ui
+           ↑          ↓
+           └── events ─┘   (ui dispatches intents, engine emits events)
+```
+
+- `data/` is pure content. No imports from `engine/` or `ui/`.
+- `engine/` is pure logic. No DOM, no `window`, no `document`. This keeps it testable under `bun test`.
+- `ui/` is the only layer that touches the DOM and browser APIs (localStorage, Web Audio, visibilitychange).
+- Cross-module communication uses a single typed event bus rather than direct imports between sibling UI modules.
+
+### Naming and shape
+
+- Filenames are lowercase camelCase matching their primary export (`profileMatcher.ts` exports `profileMatcher` or `matchProfiles`).
+- Prefer **pure functions** over classes in the engine. State lives in a single `GameState` object passed explicitly; functions return new partial state or commands.
+- Side effects (save, audio, DOM) run only in the UI layer or the tick scheduler — never mid-reducer.
+- Magic numbers belong in `data/tuning.ts`, not sprinkled across engine files. Balance changes should touch one file.
+
+### Testing discipline
+
+- Every engine module has a sibling `*.test.ts`. The engine must be testable without a browser.
+- Test the **rules**, not the implementation: "suspicion hits 75 → a random profile is flagged," not "function foo calls function bar."
+- UI modules are not unit-tested; they're exercised manually. Keep UI logic thin enough that this is fine.
+
+### When adding a feature
+
+1. Add or extend the **data** (loot pool entry, upgrade row, stage config).
+2. Add or extend the **engine** rule and its test.
+3. Wire the **UI** last.
+
+If a feature can be added by touching only `data/`, that is the success case — the engine and UI should absorb new content without structural change.
+
+### Things to resist
+
+- Premature abstractions: a shared base class for "things with a cooldown" is almost always wrong until the third instance.
+- Helper files named for what they *are* (`helpers.ts`, `misc.ts`) rather than what they *do*.
+- Deep folder nesting. Two levels under `src/` is the ceiling (`src/engine/profiles/matcher.ts` is fine; a fourth level is a warning).
+- Reaching into another module's internals because it's "just one line." Either expose it properly or duplicate.
+
+---
+
 ## UI tone drift — implementation notes
 
 Rather than a sudden switch, tone drift is implemented as a series of small CSS class mutations and text substitutions triggered by stage transitions and specific player milestones.
@@ -272,9 +329,38 @@ Rather than a sudden switch, tone drift is implemented as a series of small CSS 
 
 ---
 
-## Open design questions
+## Design decisions
 
-- **Is there a narrative end state?** Currently there is no win condition — the game escalates infinitely. An optional ending (a "you have been noticed" event that triggers a slow shutdown sequence) could provide closure.
-- **Should profiles have names?** Using plausible but clearly fictional generated names (e.g. "T. Marlow", "R. Osei") adds emotional weight without real-world concern.
-- **Mobile support?** The fragment reveal mechanic is touch-friendly by design. A responsive layout is achievable with CSS grid.
-- **Offline progression?** Standard incremental pattern: calculate elapsed time on load and award offline DP at a reduced rate (e.g. 25% of online rate).
+- **Narrative end state.** At maximum profile density, a "you have been noticed" event triggers a slow shutdown sequence as an optional ending. The player can dismiss it and continue — the game still escalates infinitely past that point. Closure is offered, not enforced.
+- **Profile names.** Profiles use generated fictional names (e.g. "T. Marlow", "R. Osei") assembled from a curated first-initial + surname pool. Names are deterministic per profile seed so saves are stable.
+- **Mobile support.** Responsive CSS grid with a stacked single-column layout below ~720px. The reveal mechanic is already touch-first.
+- **Offline progression.** Awarded on load at 25% of the online DP rate, capped at 8 hours of accumulation. See persistence section below for mechanism.
+
+---
+
+## Persistence & offline progression
+
+The game is a static site with no backend. All state lives in `localStorage` under a single key (`residue:save`). The save blob includes resources, channels, fragment pool, profile registry, suspicion, stage, and a `lastSavedAt` Unix timestamp.
+
+### Save triggers
+- **Autosave**: every 5 seconds during an active tick.
+- **`visibilitychange` → hidden**: write immediately when the tab is backgrounded.
+- **`beforeunload`**: final write before the window closes.
+
+Every write stamps `lastSavedAt = Date.now()`.
+
+### Load & offline reconciliation
+On boot:
+1. Read `residue:save`. If absent, start fresh.
+2. Compute `elapsedMs = Date.now() - lastSavedAt`.
+3. If `elapsedMs > 60_000`, run the offline reconciler:
+   - Cap `elapsedMs` at `8 * 60 * 60 * 1000` (8 hours).
+   - Award DP as `profilePassiveDpRate * (elapsedMs / 1000) * 0.25`.
+   - Do **not** spawn fragments, advance suspicion, or trigger compliance events while offline — only DP accrues. This keeps offline play safe and predictable.
+   - Show a small "while you were away" panel with the DP awarded and capped duration, in keeping with the sterile corporate tone (e.g. `[INFO] Batch reconciliation complete. 1,240 DP recovered.`).
+4. Resume normal tick.
+
+### Edge cases
+- **Clock skew / system clock moved backwards**: if `elapsedMs < 0`, treat as zero.
+- **Very long absences**: the 8-hour cap prevents a returning player from skipping progression stages in one load.
+- **Multiple tabs**: a `storage` event listener detects a second tab; the later tab shows a read-only "another session is active" notice rather than racing on writes.
