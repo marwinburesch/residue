@@ -66,11 +66,13 @@ export function tickChannels(state: GameState, dtMs: number): void {
 export function tickReveal(state: GameState, dtMs: number): void {
   for (const container of state.containers) {
     for (const f of container.fragments) {
-      if (f.resolved || f.stage === 3 || f.corrupted) continue;
+      if (f.resolved || f.corrupted) continue;
       f.stageTimer += dtMs;
+      if (f.stage === 3) continue;
       while (f.stageTimer >= REVEAL.stageAdvanceMs && f.stage < 3) {
         f.stageTimer -= REVEAL.stageAdvanceMs;
         f.stage = (f.stage + 1) as RevealStage;
+        if (f.stage === 3) f.stageTimer = 0;
       }
     }
   }
@@ -116,7 +118,12 @@ export function drainExtracted(state: GameState): ExtractedField[][] {
   for (const container of state.containers) {
     const batch: ExtractedField[] = [];
     for (const f of container.fragments) {
-      if (!f.resolved && f.stage === 3 && !f.corrupted) {
+      if (
+        !f.resolved &&
+        f.stage === 3 &&
+        !f.corrupted &&
+        f.stageTimer >= REVEAL.extractHoldMs
+      ) {
         batch.push({
           id: f.id,
           channel: container.channel,

@@ -76,8 +76,10 @@ describe("extraction", () => {
     const s = createState(42, 0);
     const c = spawnContainer(s, "receipts");
     for (const f of c.fragments) {
-      if (!f.corrupted) f.stage = 3;
-      else f.resolved = true;
+      if (!f.corrupted) {
+        f.stage = 3;
+        f.stageTimer = REVEAL.extractHoldMs;
+      } else f.resolved = true;
     }
     const batches = drainExtracted(s);
     expect(batches.length).toBe(1);
