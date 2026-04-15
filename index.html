@@ -12,11 +12,14 @@
       <span class="subtitle">Expense Records / Field Extraction</span>
       <div id="resources"></div>
     </header>
+    <nav id="tabs" role="tablist"></nav>
     <main>
-      <section id="channels"></section>
-      <section id="fragments"></section>
-      <section id="upgrades"></section>
-      <section id="registry"></section>
+      <section id="fragments" data-panel="records"></section>
+      <section data-panel="ops" class="panel-ops">
+        <div id="channels"></div>
+        <div id="upgrades"></div>
+      </section>
+      <section id="registry" data-panel="registry"></section>
     </main>
     <aside id="log"></aside>
     <script type="module" src="/src/main.ts"></script>

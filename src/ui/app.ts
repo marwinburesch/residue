@@ -19,6 +19,7 @@ export function mountApp(_root: HTMLElement): void {
   const upgradesEl = requireEl("upgrades");
   const log = requireEl("log");
   const channelsEl = requireEl("channels");
+  const tabsEl = requireEl("tabs");
   channelsEl.innerHTML = `
     <h2>Channels</h2>
     <ul class="channel-list">
@@ -28,6 +29,7 @@ export function mountApp(_root: HTMLElement): void {
       </li>
     </ul>
   `;
+  mountTabs(tabsEl);
 
   const { state, offline } = loadOrInit(Date.now());
   let wiped = false;
@@ -76,6 +78,32 @@ export function mountApp(_root: HTMLElement): void {
   });
 
   render();
+}
+
+const TABS: ReadonlyArray<{ id: string; label: string }> = [
+  { id: "records", label: "Records" },
+  { id: "ops", label: "Channels & Upgrades" },
+  { id: "registry", label: "Registry" },
+];
+
+function mountTabs(host: HTMLElement): void {
+  const panels = document.querySelectorAll<HTMLElement>("main > section[data-panel]");
+  const buttons: HTMLButtonElement[] = [];
+  const activate = (id: string) => {
+    for (const btn of buttons) btn.classList.toggle("is-active", btn.dataset.tab === id);
+    for (const panel of panels) panel.classList.toggle("is-active", panel.dataset.panel === id);
+  };
+  for (const { id, label } of TABS) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "tab";
+    btn.dataset.tab = id;
+    btn.textContent = label;
+    btn.addEventListener("click", () => activate(id));
+    host.appendChild(btn);
+    buttons.push(btn);
+  }
+  activate(TABS[0]!.id);
 }
 
 function mountResetButton(host: HTMLElement, onConfirm: () => void): void {
