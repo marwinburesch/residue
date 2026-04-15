@@ -21,7 +21,7 @@ import { fireMilestone } from "./milestones.ts";
 import {
 	autoExtractCooldownMs,
 	autoRestoreCooldownMs,
-	revealStageCost,
+	totalProcessCost,
 } from "./upgrades.ts";
 
 function rngFor(state: GameState, tag: number): Rng {
@@ -112,6 +112,7 @@ export function spawnContainer(
 			stageTimer: 0,
 			corrupted,
 			resolved: false,
+			processing: false,
 		});
 	}
 	const container: Container = {
@@ -180,14 +181,15 @@ export function tickAutoRestore(state: GameState, dtMs: number): void {
 export function tickReveal(state: GameState, dtMs: number): void {
 	for (const container of state.containers) {
 		for (const f of container.fragments) {
-			if (f.resolved || f.corrupted) continue;
-			f.stageTimer += dtMs;
+			if (f.resolved || f.corrupted || !f.processing) continue;
 			if (f.stage === 3) continue;
+			f.stageTimer += dtMs;
 			while (f.stageTimer >= REVEAL.stageAdvanceMs && f.stage < 3) {
 				f.stageTimer -= REVEAL.stageAdvanceMs;
 				f.stage = (f.stage + 1) as RevealStage;
 				if (f.stage === 3) {
 					f.stageTimer = 0;
+					f.processing = false;
 					fireMilestone(state, "firstFragmentOpened");
 				}
 			}
@@ -195,16 +197,17 @@ export function tickReveal(state: GameState, dtMs: number): void {
 	}
 }
 
-export function advanceReveal(state: GameState, fragmentId: number): boolean {
+export function startProcessing(
+	state: GameState,
+	fragmentId: number,
+): boolean {
 	const fragment = findFragment(state, fragmentId);
 	if (!fragment || fragment.resolved || fragment.corrupted) return false;
-	if (fragment.stage >= 3) return false;
-	const cost = revealStageCost(state, fragment.stage as 0 | 1 | 2);
-	if (cost <= 1) return false;
+	if (fragment.processing || fragment.stage >= 3) return false;
+	const cost = totalProcessCost(state, fragment.stage as 0 | 1 | 2);
 	if (!spendCompute(state, cost)) return false;
-	fragment.stage = 3;
+	fragment.processing = true;
 	fragment.stageTimer = 0;
-	fireMilestone(state, "firstFragmentOpened");
 	recordAction(state);
 	return true;
 }

@@ -1,18 +1,19 @@
 import { describe, expect, test } from "bun:test";
 import { createState } from "./state.ts";
 import {
-	advanceReveal,
 	drainExtracted,
 	discardFragment,
 	extractContainer,
 	isContainerReady,
 	restoreCorrupted,
 	spawnContainer,
+	startProcessing,
 	tickAutoExtract,
 	tickAutoRestore,
 	tickChannels,
 	tickReveal,
 } from "./fragments.ts";
+import { totalProcessCost } from "./upgrades.ts";
 import {
 	AUTO_EXTRACT_COOLDOWNS_MS,
 	AUTO_RESTORE_COOLDOWNS_MS,
@@ -36,48 +37,53 @@ describe("channel spawning", () => {
 	});
 });
 
-describe("reveal", () => {
-	test("auto-advances stages over time", () => {
+describe("processing", () => {
+	test("ticking does not advance un-processed fragments", () => {
 		const s = createState(42, 0);
 		const c = spawnContainer(s, "receipts");
 		const uncorrupted = c.fragments.find((f) => !f.corrupted);
 		if (!uncorrupted) return;
+		tickReveal(s, REVEAL.stageAdvanceMs * 10);
+		expect(uncorrupted.stage).toBe(0);
+		expect(uncorrupted.processing).toBe(false);
+	});
+
+	test("startProcessing pays full cost and enables timed reveal", () => {
+		const s = createState(42, 0);
+		const c = spawnContainer(s, "receipts");
+		const uncorrupted = c.fragments.find((f) => !f.corrupted);
+		if (!uncorrupted) return;
+		s.compute = 100;
+		const before = s.compute;
+		const cost = totalProcessCost(s, 0);
+		expect(startProcessing(s, uncorrupted.id)).toBe(true);
+		expect(s.compute).toBe(before - cost);
+		expect(uncorrupted.processing).toBe(true);
 		tickReveal(s, REVEAL.stageAdvanceMs);
 		expect(uncorrupted.stage).toBe(1);
 		tickReveal(s, REVEAL.stageAdvanceMs * 3);
 		expect(uncorrupted.stage).toBe(3);
+		expect(uncorrupted.processing).toBe(false);
 	});
 
-	test("manual advance fully reveals and charges current stage cost", () => {
+	test("startProcessing rejects when already processing", () => {
 		const s = createState(42, 0);
 		const c = spawnContainer(s, "receipts");
 		const uncorrupted = c.fragments.find((f) => !f.corrupted);
 		if (!uncorrupted) return;
-		const before = s.compute;
-		expect(advanceReveal(s, uncorrupted.id)).toBe(true);
-		expect(s.compute).toBe(before - REVEAL.costPerManualStage[0]);
-		expect(uncorrupted.stage).toBe(3);
+		s.compute = 100;
+		expect(startProcessing(s, uncorrupted.id)).toBe(true);
+		expect(startProcessing(s, uncorrupted.id)).toBe(false);
 	});
 
-	test("manual advance unavailable when cost is 1", () => {
-		const s = createState(42, 0);
-		const c = spawnContainer(s, "receipts");
-		const uncorrupted = c.fragments.find((f) => !f.corrupted);
-		if (!uncorrupted) return;
-		uncorrupted.stage = 2;
-		const before = s.compute;
-		expect(advanceReveal(s, uncorrupted.id)).toBe(false);
-		expect(s.compute).toBe(before);
-		expect(uncorrupted.stage).toBe(2);
-	});
-
-	test("manual advance fails when Compute is insufficient", () => {
+	test("startProcessing fails when Compute is insufficient", () => {
 		const s = createState(42, 0);
 		const c = spawnContainer(s, "receipts");
 		const uncorrupted = c.fragments.find((f) => !f.corrupted);
 		if (!uncorrupted) return;
 		s.compute = 0;
-		expect(advanceReveal(s, uncorrupted.id)).toBe(false);
+		expect(startProcessing(s, uncorrupted.id)).toBe(false);
+		expect(uncorrupted.processing).toBe(false);
 		expect(uncorrupted.stage).toBe(0);
 	});
 
@@ -86,6 +92,7 @@ describe("reveal", () => {
 		const c = spawnContainer(s, "receipts");
 		const corrupted = c.fragments.find((f) => f.corrupted);
 		if (!corrupted) return;
+		corrupted.processing = true;
 		tickReveal(s, REVEAL.stageAdvanceMs * 10);
 		expect(corrupted.stage).toBe(0);
 	});

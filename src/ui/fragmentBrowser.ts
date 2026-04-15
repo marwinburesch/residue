@@ -1,12 +1,12 @@
 import { CHANNEL, REVEAL } from "../data/tuning.ts";
 import type { Container, Fragment, GameState } from "../engine/state.ts";
 import {
-	advanceReveal,
 	extractContainer,
 	isContainerReady,
 	restoreCorrupted,
+	startProcessing,
 } from "../engine/fragments.ts";
-import { revealStageCost } from "../engine/upgrades.ts";
+import { totalProcessCost } from "../engine/upgrades.ts";
 import { createButton, type ButtonHandle } from "./button.ts";
 
 const GLYPHS = "▓▒░█#@%&*+".split("");
@@ -20,6 +20,7 @@ type FragmentView = {
 	lastResolved: boolean;
 	lastCost: number;
 	lastAffordable: boolean;
+	lastProcessing: boolean;
 	lostAnimating: boolean;
 };
 
@@ -214,7 +215,7 @@ function syncContainer(
 	const ready = isContainerReady(container);
 	if (ready !== cv.lastReady) {
 		cv.extractBtn.update({
-			label: ready ? "Extract" : "Revealing…",
+			label: ready ? "Extract" : "Processing…",
 			disabled: !ready,
 			dim: !ready,
 		});
@@ -240,11 +241,11 @@ function createFragmentView(
 
 	const actionBtn = createButton({
 		variant: "inline",
-		label: "Reveal",
+		label: "Process",
 		onClick: () => {
 			if (fragment.corrupted) {
 				if (restoreCorrupted(state, fragment.id)) onMutate();
-			} else if (advanceReveal(state, fragment.id)) onMutate();
+			} else if (startProcessing(state, fragment.id)) onMutate();
 		},
 	});
 
@@ -259,6 +260,7 @@ function createFragmentView(
 		lastResolved: !fragment.resolved,
 		lastCost: -1,
 		lastAffordable: false,
+		lastProcessing: false,
 		lostAnimating: false,
 	};
 }
@@ -270,15 +272,16 @@ function syncFragment(
 ): void {
 	const nextCost = fragment.corrupted
 		? REVEAL.corruptionRestoreCost
-		: fragment.stage < 3
-			? revealStageCost(state, fragment.stage as 0 | 1 | 2)
+		: !fragment.processing && fragment.stage < 3
+			? totalProcessCost(state, fragment.stage as 0 | 1 | 2)
 			: -1;
 	const affordable = nextCost >= 0 && state.compute >= nextCost;
 	if (
 		fv.lastStage === fragment.stage &&
 		fv.lastCorrupted === fragment.corrupted &&
 		fv.lastCost === nextCost &&
-		fv.lastAffordable === affordable
+		fv.lastAffordable === affordable &&
+		fv.lastProcessing === fragment.processing
 	) {
 		return;
 	}
@@ -289,6 +292,7 @@ function syncFragment(
 	fv.lastCorrupted = fragment.corrupted;
 	fv.lastCost = nextCost;
 	fv.lastAffordable = affordable;
+	fv.lastProcessing = fragment.processing;
 
 	if (fragment.corrupted) {
 		fv.actionBtn.update({
@@ -298,12 +302,12 @@ function syncFragment(
 			label: "Restore",
 			cost: { amount: REVEAL.corruptionRestoreCost, unit: "c" },
 		});
-	} else if (fragment.stage < 3 && nextCost > 1) {
+	} else if (!fragment.processing && fragment.stage < 3) {
 		fv.actionBtn.update({
 			hidden: false,
 			disabled: !affordable,
 			dim: !affordable,
-			label: "Reveal",
+			label: "Process",
 			cost: { amount: nextCost, unit: "c" },
 		});
 	} else {

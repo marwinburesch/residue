@@ -22,6 +22,7 @@ export type Fragment = {
 	stageTimer: number;
 	corrupted: boolean;
 	resolved: boolean;
+	processing: boolean;
 };
 
 export type Container = {

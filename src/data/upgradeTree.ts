@@ -39,10 +39,10 @@ export const REVEAL_STAGE_COSTS: readonly (readonly [
 	number,
 	number,
 ])[] = [
-	[3, 2, 1],
-	[2, 2, 1],
 	[2, 1, 1],
 	[1, 1, 1],
+	[1, 1, 0],
+	[1, 0, 0],
 ];
 
 export const upgrades: Record<UpgradeId, UpgradeDef> = {
@@ -78,8 +78,8 @@ export const upgrades: Record<UpgradeId, UpgradeDef> = {
 	},
 	revealCost: {
 		id: "revealCost",
-		name: "Reveal efficiency",
-		description: "Compute per manual reveal stage.",
+		name: "Processing efficiency",
+		description: "Compute to start processing (per remaining stage).",
 		costs: [60, 150, 360],
 		effect: (lvl) => REVEAL_STAGE_COSTS[lvl]!.join(" / "),
 	},

@@ -67,6 +67,17 @@ export function revealStageCost(state: GameState, stage: 0 | 1 | 2): number {
 	return REVEAL_STAGE_COSTS[upgradeLevel(state, "revealCost")]![stage]!;
 }
 
+export function totalProcessCost(
+	state: GameState,
+	fromStage: 0 | 1 | 2,
+): number {
+	let total = 0;
+	for (let s = fromStage; s <= 2; s++) {
+		total += revealStageCost(state, s as 0 | 1 | 2);
+	}
+	return total;
+}
+
 export function computeMax(state: GameState): number {
 	const lvl = upgradeLevel(state, "machineTier");
 	if (lvl === 0) return COMPUTE_MAX_BASE;
