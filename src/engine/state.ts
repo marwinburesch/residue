@@ -71,7 +71,7 @@ export type GameState = {
   log: LogEntry[];
   lastSavedAt: number;
   nextId: number;
-  channels: Record<ChannelId, ChannelRuntime>;
+  channels: Partial<Record<ChannelId, ChannelRuntime>>;
   containers: Container[];
   pendingExtractions: ExtractedField[][];
   profiles: Profile[];

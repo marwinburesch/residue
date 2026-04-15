@@ -133,7 +133,7 @@ function createContainerView(
   const card = document.createElement("article");
   card.className = `container-card rarity-${container.rarity ?? "common"}`;
   const title = document.createElement("h3");
-  title.textContent = `Receipt #${container.id}`;
+  title.textContent = `${sourceLabel(container.channel)} #${container.id}`;
   if (container.rarity && container.rarity !== "common") {
     const badge = document.createElement("span");
     badge.className = "rarity-badge";
@@ -300,6 +300,10 @@ function syncFragment(
   } else {
     fv.actionBtn.update({ hidden: true });
   }
+}
+
+function sourceLabel(channel: Container["channel"]): string {
+  return channel === "corkboard" ? "Note" : "Receipt";
 }
 
 function obscure(fragment: Fragment): string {

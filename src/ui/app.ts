@@ -20,18 +20,20 @@ export function mountApp(_root: HTMLElement): void {
   const log = requireEl("log");
   const channelsEl = requireEl("channels");
   const tabsEl = requireEl("tabs");
-  channelsEl.innerHTML = `
-    <h2>Channels</h2>
-    <ul class="channel-list">
-      <li class="channel channel--active">
-        <span class="channel-name">Discarded receipts</span>
-        <span class="channel-meta">Active</span>
-      </li>
-    </ul>
-  `;
   mountTabs(tabsEl);
 
   const { state, offline } = loadOrInit(Date.now());
+  const renderChannels = () => {
+    const items = [
+      `<li class="channel channel--active"><span class="channel-name">Discarded receipts</span><span class="channel-meta">Active</span></li>`,
+    ];
+    if (state.channels.corkboard) {
+      items.push(
+        `<li class="channel channel--active"><span class="channel-name">Corkboard notes</span><span class="channel-meta">Active</span></li>`,
+      );
+    }
+    channelsEl.innerHTML = `<h2>Channels</h2><ul class="channel-list">${items.join("")}</ul>`;
+  };
   let wiped = false;
   mountResetButton(resources.parentElement ?? resources, () => {
     wiped = true;
@@ -49,6 +51,7 @@ export function mountApp(_root: HTMLElement): void {
 
   const render = () => {
     applyToneStage(state.stage);
+    renderChannels();
     renderResourceBar(resources, state);
     renderFragmentBrowser(fragments, state, render);
     renderUpgradePanel(upgradesEl, state, render);

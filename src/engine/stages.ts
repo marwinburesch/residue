@@ -27,6 +27,9 @@ export function advanceStageIfReady(state: GameState): boolean {
   const next = canAdvance(state);
   if (next === null) return false;
   state.stage = next;
-  if (next === 1) fireMilestone(state, "stage1Unlock");
+  if (next === 1) {
+    fireMilestone(state, "stage1Unlock");
+    state.channels.corkboard ??= { spawnAccumulator: 0 };
+  }
   return true;
 }

@@ -110,15 +110,18 @@ export function spawnContainer(state: GameState, channel: ChannelId): Container 
 }
 
 export function tickChannels(state: GameState, dtMs: number): void {
-  const rt = state.channels.receipts;
-  rt.spawnAccumulator += (dtMs / 1000) * CHANNEL.receiptsSpawnPerSecond;
   const cap = CHANNEL.receiptsContainerCap;
-  while (rt.spawnAccumulator >= 1 && state.containers.length < cap) {
-    rt.spawnAccumulator -= 1;
-    spawnContainer(state, "receipts");
-  }
-  if (rt.spawnAccumulator > 1 && state.containers.length >= cap) {
-    rt.spawnAccumulator = 1;
+  for (const id of Object.keys(state.channels) as ChannelId[]) {
+    const rt = state.channels[id];
+    if (!rt) continue;
+    rt.spawnAccumulator += (dtMs / 1000) * CHANNEL.receiptsSpawnPerSecond;
+    while (rt.spawnAccumulator >= 1 && state.containers.length < cap) {
+      rt.spawnAccumulator -= 1;
+      spawnContainer(state, id);
+    }
+    if (rt.spawnAccumulator > 1 && state.containers.length >= cap) {
+      rt.spawnAccumulator = 1;
+    }
   }
 }
 

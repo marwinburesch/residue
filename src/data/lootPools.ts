@@ -6,7 +6,10 @@ export type FieldKind =
   | "loyaltyId"
   | "paymentLast4"
   | "storeLocation"
-  | "totalAmount";
+  | "totalAmount"
+  | "phoneFragment"
+  | "employer"
+  | "roomNumber";
 
 export type FieldDef = {
   kind: FieldKind;
@@ -17,7 +20,7 @@ export type FieldDef = {
   requiresPerson?: boolean;
 };
 
-export type ChannelId = "receipts";
+export type ChannelId = "receipts" | "corkboard";
 
 export type ChannelDef = {
   id: ChannelId;
@@ -96,4 +99,42 @@ export const receipts: ChannelDef = {
   ],
 };
 
-export const channels: Record<ChannelId, ChannelDef> = { receipts };
+export const corkboard: ChannelDef = {
+  id: "corkboard",
+  label: "Corkboard notes",
+  fieldsPerContainer: [2, 3],
+  pool: [
+    {
+      kind: "name",
+      label: "Handwritten name",
+      weight: 3,
+      samples: ["T. Marlow", "R. Osei", "K. Bender", "A. Yilmaz", "S. Devlin"],
+    },
+    {
+      kind: "phoneFragment",
+      label: "Phone fragment",
+      weight: 3,
+      samples: ["…407 2218", "…882 0914", "…330 4471", "…715 6620", "…204 8893"],
+    },
+    {
+      kind: "employer",
+      label: "Employer",
+      weight: 3,
+      samples: [
+        "Harlow & Sable (temp)",
+        "Meridian Couriers",
+        "Bright Path Cleaning",
+        "Unknown — self-described freelance",
+        "Blackhorse Logistics",
+      ],
+    },
+    {
+      kind: "roomNumber",
+      label: "Room / unit",
+      weight: 2,
+      samples: ["Room 3B", "Flat 12", "Unit 7", "Room 2A", "Flat 4C"],
+    },
+  ],
+};
+
+export const channels: Record<ChannelId, ChannelDef> = { receipts, corkboard };
