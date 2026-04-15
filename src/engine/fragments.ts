@@ -146,7 +146,8 @@ export function restoreCorrupted(state: GameState, fragmentId: number): boolean 
   const fragment = findFragment(state, fragmentId);
   if (!fragment || !fragment.corrupted || fragment.resolved) return false;
   if (!spendCompute(state, REVEAL.corruptionRestoreCost)) return false;
-  const rng = rngFor(state, fragment.id * 16807);
+  state.rngSeed = (state.rngSeed + 0x9e3779b1) >>> 0;
+  const rng = rngFor(state, fragment.id);
   if (rng() < REVEAL.corruptionRestoreChance) {
     fragment.corrupted = false;
     fragment.stageTimer = 0;

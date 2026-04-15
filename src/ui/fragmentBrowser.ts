@@ -20,6 +20,7 @@ type FragmentView = {
   lastResolved: boolean;
   lastCost: number;
   lastAffordable: boolean;
+  lostAnimating: boolean;
 };
 
 type ContainerView = {
@@ -166,9 +167,27 @@ function syncContainer(
 ): void {
   const liveIds = new Set<number>();
   for (const fragment of container.fragments) {
+    const existing = cv.fragments.get(fragment.id);
+    if (fragment.resolved && fragment.corrupted && existing && !existing.lostAnimating) {
+      existing.lostAnimating = true;
+      existing.row.classList.add("fragment-row--lost");
+      existing.actionBtn.update({ hidden: true });
+      existing.row.addEventListener(
+        "animationend",
+        () => {
+          existing.row.remove();
+          cv.fragments.delete(fragment.id);
+        },
+        { once: true },
+      );
+    }
+    if (existing?.lostAnimating) {
+      liveIds.add(fragment.id);
+      continue;
+    }
     if (fragment.resolved) continue;
     liveIds.add(fragment.id);
-    let fv = cv.fragments.get(fragment.id);
+    let fv = existing;
     if (!fv) {
       fv = createFragmentView(fragment, state, onMutate);
       cv.fragments.set(fragment.id, fv);
@@ -230,6 +249,7 @@ function createFragmentView(
     lastResolved: !fragment.resolved,
     lastCost: -1,
     lastAffordable: false,
+    lostAnimating: false,
   };
 }
 
