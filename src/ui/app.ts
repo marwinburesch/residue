@@ -9,6 +9,7 @@ import { renderProfileRegistry } from "./profileRegistry.ts";
 import { renderUpgradePanel } from "./upgradePanel.ts";
 import { renderLog } from "./log.ts";
 import { applyToneStage } from "./toneController.ts";
+import { loadTheme, toggleTheme } from "./themeController.ts";
 
 const AUTOSAVE_MS = 5_000;
 
@@ -35,6 +36,7 @@ export function mountApp(_root: HTMLElement): void {
 		channelsEl.innerHTML = `<h2>Channels</h2><ul class="channel-list">${items.join("")}</ul>`;
 	};
 	let wiped = false;
+	mountThemeToggle(resources.parentElement ?? resources);
 	mountResetButton(resources.parentElement ?? resources, () => {
 		wiped = true;
 		wipe();
@@ -113,6 +115,23 @@ function mountTabs(host: HTMLElement): void {
 		buttons.push(btn);
 	}
 	activate(TABS[0]!.id);
+}
+
+function mountThemeToggle(host: HTMLElement): void {
+	const btn = createButton({
+		variant: "inline",
+		label: labelFor(loadTheme()),
+		onClick: () => {
+			const next = toggleTheme();
+			btn.update({ label: labelFor(next) });
+		},
+	});
+	btn.el.classList.add("btn--theme");
+	host.appendChild(btn.el);
+}
+
+function labelFor(theme: "light" | "dark"): string {
+	return theme === "light" ? "Dark" : "Light";
 }
 
 function mountResetButton(host: HTMLElement, onConfirm: () => void): void {

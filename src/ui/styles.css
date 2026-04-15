@@ -1,4 +1,9 @@
 :root {
+	font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+:root,
+:root[data-theme="light"] {
 	--bg: #ffffff;
 	--ink: #1a1a1a;
 	--muted: #6a6a6a;
@@ -6,7 +11,28 @@
 	--accent: #2b6cb0;
 	--warn: #b0452b;
 	--card: #fafafa;
-	font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+	--topbar: oklch(88% 0.011 106.6);
+	--rarity-uncommon: #3a9a3a;
+	--rarity-rare: #2b6cb0;
+	--rarity-epic: #7a3ab0;
+	--rarity-legendary: #c4a000;
+	--rarity-mythic: #1aa6a6;
+}
+
+:root[data-theme="dark"] {
+	--bg: #14120f;
+	--ink: #e8e4dc;
+	--muted: #8a857c;
+	--line: oklch(32% 0.012 90);
+	--accent: #6aa8e0;
+	--warn: #e08060;
+	--card: #1c1a16;
+	--topbar: oklch(22% 0.01 90);
+	--rarity-uncommon: #6fcf6f;
+	--rarity-rare: #6aa8e0;
+	--rarity-epic: #b583e0;
+	--rarity-legendary: #e6c74d;
+	--rarity-mythic: #5ed6d6;
 }
 
 * {
@@ -64,7 +90,7 @@ body {
 	display: flex;
 	align-items: baseline;
 	gap: 16px;
-	background-color: oklch(88% 0.011 106.6);
+	background-color: var(--topbar);
 }
 
 .brand {
@@ -294,19 +320,19 @@ h2 {
 	background: currentColor;
 }
 .rarity-uncommon .rarity-badge {
-	color: #3a9a3a;
+	color: var(--rarity-uncommon);
 }
 .rarity-rare .rarity-badge {
-	color: #2b6cb0;
+	color: var(--rarity-rare);
 }
 .rarity-epic .rarity-badge {
-	color: #7a3ab0;
+	color: var(--rarity-epic);
 }
 .rarity-legendary .rarity-badge {
-	color: #c4a000;
+	color: var(--rarity-legendary);
 }
 .rarity-mythic .rarity-badge {
-	color: #1aa6a6;
+	color: var(--rarity-mythic);
 }
 .container-card h3 {
 	margin: 0 0 10px;
@@ -511,9 +537,14 @@ h2 {
 	color: #0c0c0c;
 }
 
-body[data-tone-stage="1"] {
+:root[data-theme="light"] body[data-tone-stage="1"] {
 	--bg: #f4f1ea;
 	--card: #f0ece3;
+}
+:root[data-theme="dark"] body[data-tone-stage="1"] {
+	--bg: #181510;
+	--card: #201c16;
+	--ink: #efe8d8;
 }
 body[data-tone-stage="1"] #log {
 	font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
