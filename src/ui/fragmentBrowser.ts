@@ -2,7 +2,6 @@ import { REVEAL } from "../data/tuning.ts";
 import type { Container, Fragment, GameState } from "../engine/state.ts";
 import {
   advanceReveal,
-  discardFragment,
   extractContainer,
   isContainerReady,
   restoreCorrupted,
@@ -13,9 +12,7 @@ const GLYPHS = "▓▒░█#@%&*+".split("");
 type FragmentView = {
   row: HTMLElement;
   valueEl: HTMLElement;
-  revealBtn: HTMLButtonElement;
-  restoreBtn: HTMLButtonElement;
-  discardBtn: HTMLButtonElement;
+  actionBtn: HTMLButtonElement;
   lastStage: number;
   lastCorrupted: boolean;
   lastResolved: boolean;
@@ -146,36 +143,21 @@ function createFragmentView(
   const valueEl = document.createElement("span");
   valueEl.className = "fragment-value";
 
-  const revealBtn = document.createElement("button");
-  revealBtn.type = "button";
-  revealBtn.className = "fragment-action";
-  revealBtn.addEventListener("click", () => {
-    if (advanceReveal(state, fragment.id)) onMutate();
+  const actionBtn = document.createElement("button");
+  actionBtn.type = "button";
+  actionBtn.className = "fragment-action";
+  actionBtn.addEventListener("click", () => {
+    if (fragment.corrupted) {
+      if (restoreCorrupted(state, fragment.id)) onMutate();
+    } else if (advanceReveal(state, fragment.id)) onMutate();
   });
 
-  const restoreBtn = document.createElement("button");
-  restoreBtn.type = "button";
-  restoreBtn.className = "fragment-action";
-  restoreBtn.addEventListener("click", () => {
-    if (restoreCorrupted(state, fragment.id)) onMutate();
-  });
-
-  const discardBtn = document.createElement("button");
-  discardBtn.type = "button";
-  discardBtn.className = "fragment-action fragment-action--secondary";
-  discardBtn.textContent = "Discard";
-  discardBtn.addEventListener("click", () => {
-    if (discardFragment(state, fragment.id)) onMutate();
-  });
-
-  row.append(label, valueEl, revealBtn, restoreBtn, discardBtn);
+  row.append(label, valueEl, actionBtn);
 
   return {
     row,
     valueEl,
-    revealBtn,
-    restoreBtn,
-    discardBtn,
+    actionBtn,
     lastStage: -1,
     lastCorrupted: !fragment.corrupted,
     lastResolved: !fragment.resolved,
@@ -192,23 +174,17 @@ function syncFragment(fv: FragmentView, fragment: Fragment): void {
     fv.lastCorrupted = fragment.corrupted;
 
     if (fragment.corrupted) {
-      fv.revealBtn.hidden = true;
-      fv.restoreBtn.hidden = false;
-      fv.discardBtn.hidden = false;
-      fv.restoreBtn.textContent = `Restore (${REVEAL.corruptionRestoreCost}c)`;
+      fv.actionBtn.hidden = false;
+      fv.actionBtn.disabled = false;
+      fv.actionBtn.textContent = `Restore (${REVEAL.corruptionRestoreCost}c)`;
+    } else if (fragment.stage < 3) {
+      const cost =
+        (REVEAL.costPerManualStage as readonly number[])[fragment.stage] ?? 0;
+      fv.actionBtn.hidden = false;
+      fv.actionBtn.disabled = false;
+      fv.actionBtn.textContent = `Reveal (${cost}c)`;
     } else {
-      fv.restoreBtn.hidden = true;
-      fv.discardBtn.hidden = true;
-      fv.revealBtn.hidden = false;
-      if (fragment.stage < 3) {
-        const cost =
-          (REVEAL.costPerManualStage as readonly number[])[fragment.stage] ?? 0;
-        fv.revealBtn.textContent = `Reveal (${cost}c)`;
-        fv.revealBtn.disabled = false;
-      } else {
-        fv.revealBtn.textContent = "Ready";
-        fv.revealBtn.disabled = true;
-      }
+      fv.actionBtn.hidden = true;
     }
   }
 }
