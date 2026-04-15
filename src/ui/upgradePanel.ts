@@ -11,12 +11,13 @@ import {
   upgradeCost,
   upgradeLevel,
 } from "../engine/upgrades.ts";
+import { createButton, type ButtonHandle } from "./button.ts";
 
 type RowView = {
   row: HTMLElement;
   levelEl: HTMLElement;
   effectEl: HTMLElement;
-  btn: HTMLButtonElement;
+  btn: ButtonHandle;
   lastLevel: number;
   lastCost: number | null;
   lastAffordable: boolean;
@@ -90,14 +91,15 @@ function createRow(
   const effectEl = document.createElement("p");
   effectEl.className = "upgrade-effect";
 
-  const btn = document.createElement("button");
-  btn.type = "button";
-  btn.className = "upgrade-buy";
-  btn.addEventListener("click", () => {
-    if (purchaseUpgrade(state, id)) onMutate();
+  const btn = createButton({
+    variant: "block",
+    label: "Buy",
+    onClick: () => {
+      if (purchaseUpgrade(state, id)) onMutate();
+    },
   });
 
-  row.append(header, desc, effectEl, btn);
+  row.append(header, desc, effectEl, btn.el);
 
   return {
     row,
@@ -130,13 +132,15 @@ function syncRow(rv: RowView, id: UpgradeId, state: GameState): void {
 
   if (cost === null) {
     rv.effectEl.textContent = `${def.effect(level)} — max`;
-    rv.btn.hidden = true;
+    rv.btn.update({ hidden: true });
     rv.row.classList.add("is-max");
     return;
   }
   rv.row.classList.remove("is-max");
   rv.effectEl.textContent = `${def.effect(level)} → ${def.effect(level + 1)}`;
-  rv.btn.hidden = false;
-  rv.btn.textContent = `Buy · ${cost} DP`;
-  rv.btn.disabled = !affordable;
+  rv.btn.update({
+    hidden: false,
+    cost: { amount: cost, unit: "DP" },
+    disabled: !affordable,
+  });
 }

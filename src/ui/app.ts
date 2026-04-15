@@ -11,6 +11,7 @@ import { renderLog } from "./log.ts";
 const AUTOSAVE_MS = 5_000;
 
 export function mountApp(_root: HTMLElement): void {
+  document.body.dataset.toneStage = "0";
   const resources = requireEl("resources");
   const fragments = requireEl("fragments");
   const registry = requireEl("registry");

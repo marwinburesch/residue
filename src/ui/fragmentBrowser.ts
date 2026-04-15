@@ -7,13 +7,14 @@ import {
   restoreCorrupted,
 } from "../engine/fragments.ts";
 import { revealStageCost } from "../engine/upgrades.ts";
+import { createButton, type ButtonHandle } from "./button.ts";
 
 const GLYPHS = "▓▒░█#@%&*+".split("");
 
 type FragmentView = {
   row: HTMLElement;
   valueEl: HTMLElement;
-  actionBtn: HTMLButtonElement;
+  actionBtn: ButtonHandle;
   lastStage: number;
   lastCorrupted: boolean;
   lastResolved: boolean;
@@ -23,7 +24,7 @@ type FragmentView = {
 type ContainerView = {
   card: HTMLElement;
   body: HTMLElement;
-  extractBtn: HTMLButtonElement;
+  extractBtn: ButtonHandle;
   fragments: Map<number, FragmentView>;
   lastReady: boolean;
 };
@@ -87,14 +88,15 @@ function createContainerView(
   title.textContent = `Receipt #${container.id}`;
   const body = document.createElement("div");
   body.className = "container-body";
-  const extractBtn = document.createElement("button");
-  extractBtn.type = "button";
-  extractBtn.className = "container-extract";
-  extractBtn.textContent = "Extract";
-  extractBtn.addEventListener("click", () => {
-    if (extractContainer(state, container.id)) onMutate();
+  const extractBtn = createButton({
+    variant: "block",
+    label: "Extract",
+    dim: true,
+    onClick: () => {
+      if (extractContainer(state, container.id)) onMutate();
+    },
   });
-  card.append(title, body, extractBtn);
+  card.append(title, body, extractBtn.el);
   return { card, body, extractBtn, fragments: new Map(), lastReady: false };
 }
 
@@ -124,7 +126,7 @@ function syncContainer(
   }
   const ready = isContainerReady(container);
   if (ready !== cv.lastReady) {
-    cv.extractBtn.disabled = !ready;
+    cv.extractBtn.update({ disabled: !ready, dim: !ready });
     cv.card.classList.toggle("is-ready", ready);
     cv.lastReady = ready;
   }
@@ -145,16 +147,17 @@ function createFragmentView(
   const valueEl = document.createElement("span");
   valueEl.className = "fragment-value";
 
-  const actionBtn = document.createElement("button");
-  actionBtn.type = "button";
-  actionBtn.className = "fragment-action";
-  actionBtn.addEventListener("click", () => {
-    if (fragment.corrupted) {
-      if (restoreCorrupted(state, fragment.id)) onMutate();
-    } else if (advanceReveal(state, fragment.id)) onMutate();
+  const actionBtn = createButton({
+    variant: "inline",
+    label: "Reveal",
+    onClick: () => {
+      if (fragment.corrupted) {
+        if (restoreCorrupted(state, fragment.id)) onMutate();
+      } else if (advanceReveal(state, fragment.id)) onMutate();
+    },
   });
 
-  row.append(label, valueEl, actionBtn);
+  row.append(label, valueEl, actionBtn.el);
 
   return {
     row,
@@ -191,15 +194,21 @@ function syncFragment(
   fv.lastCost = nextCost;
 
   if (fragment.corrupted) {
-    fv.actionBtn.hidden = false;
-    fv.actionBtn.disabled = false;
-    fv.actionBtn.textContent = `Restore (${REVEAL.corruptionRestoreCost}c)`;
+    fv.actionBtn.update({
+      hidden: false,
+      disabled: false,
+      label: "Restore",
+      cost: { amount: REVEAL.corruptionRestoreCost, unit: "c" },
+    });
   } else if (fragment.stage < 3) {
-    fv.actionBtn.hidden = false;
-    fv.actionBtn.disabled = false;
-    fv.actionBtn.textContent = `Reveal (${nextCost}c)`;
+    fv.actionBtn.update({
+      hidden: false,
+      disabled: false,
+      label: "Reveal",
+      cost: { amount: nextCost, unit: "c" },
+    });
   } else {
-    fv.actionBtn.hidden = true;
+    fv.actionBtn.update({ hidden: true });
   }
 }
 

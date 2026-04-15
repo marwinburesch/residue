@@ -124,25 +124,28 @@ main {
   font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 11px;
 }
-.upgrade-buy {
-  width: 100%;
+.btn {
   background: var(--bg);
   border: 1px solid var(--ink);
   color: var(--ink);
   font: inherit;
   font-size: 11px;
   letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 8px 0;
   cursor: pointer;
   transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
 }
-.upgrade-buy:hover:not(:disabled) { background: var(--ink); color: var(--bg); }
-.upgrade-buy:disabled {
-  border-color: var(--line);
-  color: var(--muted);
-  cursor: default;
+.btn:hover:not(:disabled) { background: var(--ink); color: var(--bg); }
+.btn:disabled { cursor: default; }
+.btn--block {
+  width: 100%;
+  text-transform: uppercase;
+  padding: 8px 0;
 }
+.btn--block:disabled { border-color: var(--line); color: var(--muted); }
+.btn--inline { padding: 4px 10px; }
+.btn--inline:disabled { opacity: 0.5; }
+.btn--dim { border-color: var(--line); color: var(--muted); }
+.container-card.is-ready .btn--dim { border-color: var(--ink); color: var(--ink); }
 .upgrade-row.is-max .upgrade-effect { color: var(--muted); }
 
 h2 {
@@ -211,40 +214,7 @@ h2 {
   white-space: nowrap;
 }
 
-.fragment-action {
-  background: var(--bg);
-  border: 1px solid var(--ink);
-  color: var(--ink);
-  font: inherit;
-  font-size: 11px;
-  padding: 4px 10px;
-  cursor: pointer;
-  transition: background 120ms ease;
-}
-.fragment-action:hover:not(:disabled) { background: var(--ink); color: var(--bg); }
-.fragment-action:disabled { opacity: 0.5; cursor: default; }
-.fragment-action--secondary { border-color: var(--line); color: var(--muted); }
-
-.container-extract {
-  margin-top: 12px;
-  width: 100%;
-  background: var(--bg);
-  border: 1px solid var(--line);
-  color: var(--muted);
-  font: inherit;
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 8px 0;
-  cursor: pointer;
-  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
-}
-.container-card.is-ready .container-extract {
-  border-color: var(--ink);
-  color: var(--ink);
-}
-.container-extract:hover:not(:disabled) { background: var(--ink); color: var(--bg); }
-.container-extract:disabled { cursor: default; }
+.container-card > .btn--block { margin-top: 12px; }
 
 .profile {
   padding: 10px 0;
