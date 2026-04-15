@@ -80,6 +80,7 @@ export type GameState = {
 	upgrades: Partial<Record<UpgradeId, number>>;
 	autoExtractTimer: number;
 	autoRestoreTimer: number;
+	processAutoTimer: number;
 	milestonesFired: MilestoneKey[];
 	stage: StageId;
 };
@@ -103,6 +104,7 @@ export function createState(seed: number, now: number): GameState {
 		upgrades: {},
 		autoExtractTimer: 0,
 		autoRestoreTimer: 0,
+		processAutoTimer: 0,
 		milestonesFired: [],
 		stage: 0,
 	};

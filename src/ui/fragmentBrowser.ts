@@ -3,10 +3,11 @@ import type { Container, Fragment, GameState } from "../engine/state.ts";
 import {
 	extractContainer,
 	isContainerReady,
+	processAllInContainer,
 	restoreCorrupted,
 	startProcessing,
 } from "../engine/fragments.ts";
-import { totalProcessCost } from "../engine/upgrades.ts";
+import { totalProcessCost, upgradeLevel } from "../engine/upgrades.ts";
 import { createButton, type ButtonHandle } from "./button.ts";
 
 const GLYPHS = "▓▒░█#@%&*+".split("");
@@ -28,6 +29,7 @@ type ContainerView = {
 	card: HTMLElement;
 	body: HTMLElement;
 	extractBtn: ButtonHandle;
+	processAllBtn: ButtonHandle;
 	fragments: Map<number, FragmentView>;
 	lastReady: boolean | null;
 };
@@ -161,8 +163,24 @@ function createContainerView(
 			if (extractContainer(state, container.id)) onMutate();
 		},
 	});
-	card.append(title, body, extractBtn.el);
-	return { card, body, extractBtn, fragments: new Map(), lastReady: null };
+	const processAllBtn = createButton({
+		variant: "block",
+		label: "Process all",
+		dim: true,
+		onClick: () => {
+			if (processAllInContainer(state, container.id) > 0) onMutate();
+		},
+	});
+	processAllBtn.update({ hidden: true });
+	card.append(title, body, processAllBtn.el, extractBtn.el);
+	return {
+		card,
+		body,
+		extractBtn,
+		processAllBtn,
+		fragments: new Map(),
+		lastReady: null,
+	};
 }
 
 function syncContainer(
@@ -221,6 +239,31 @@ function syncContainer(
 		});
 		cv.card.classList.toggle("is-ready", ready);
 		cv.lastReady = ready;
+	}
+
+	const autoLvl = upgradeLevel(state, "processAuto");
+	if (autoLvl < 1) {
+		cv.processAllBtn.update({ hidden: true });
+	} else {
+		let totalCost = 0;
+		let eligible = 0;
+		for (const f of container.fragments) {
+			if (f.resolved || f.corrupted || f.processing || f.stage >= 3) continue;
+			totalCost += totalProcessCost(state, f.stage as 0 | 1 | 2);
+			eligible++;
+		}
+		if (eligible === 0) {
+			cv.processAllBtn.update({ hidden: true });
+		} else {
+			const affordable = state.compute >= totalCost;
+			cv.processAllBtn.update({
+				hidden: false,
+				disabled: !affordable,
+				dim: !affordable,
+				label: "Process all",
+				cost: { amount: totalCost, unit: "c" },
+			});
+		}
 	}
 }
 

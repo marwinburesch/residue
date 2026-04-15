@@ -12,6 +12,14 @@ export function recordAction(state: GameState): void {
 	}
 }
 
+export function suspicionThrottle(state: GameState): number {
+	const level = state.suspicion.level;
+	if (level <= SUSPICION.throttleFrom) return 1;
+	const span = SUSPICION.max - SUSPICION.throttleFrom;
+	const progress = Math.min(1, (level - SUSPICION.throttleFrom) / span);
+	return 1 - (1 - SUSPICION.throttleFloor) * progress;
+}
+
 export function tickSuspicion(state: GameState, dtMs: number): void {
 	if (state.suspicion.level <= 0) return;
 	state.suspicion.level = Math.max(

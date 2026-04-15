@@ -155,13 +155,36 @@ main > section.is-active {
 	align-items: start;
 }
 
-#fragments.is-active {
+.panel-records.is-active {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	padding: 16px;
+}
+.panel-records #fragments {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, 20rem);
 	grid-auto-rows: 22rem;
 	gap: 14px;
-	padding: 16px;
 	justify-content: start;
+}
+.records-toolbar {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+	min-height: 2rem;
+}
+.records-toolbar:empty {
+	display: none;
+}
+.throughput-readout {
+	font-size: 0.85rem;
+	color: var(--ink-dim, #888);
+	font-variant-numeric: tabular-nums;
+	margin-left: auto;
+}
+.throughput-readout--warn {
+	color: var(--warn, #c44);
 }
 .container-slot--empty {
 	border: 1px dashed var(--line);
@@ -489,7 +512,7 @@ h2 {
 	.panel-ops {
 		grid-template-columns: 1fr;
 	}
-	#fragments {
+	.panel-records #fragments {
 		grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
 	}
 }

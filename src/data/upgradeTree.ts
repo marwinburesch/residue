@@ -3,7 +3,9 @@ export type UpgradeId =
 	| "autoExtract"
 	| "autoRestore"
 	| "revealCost"
-	| "machineTier";
+	| "machineTier"
+	| "processAuto"
+	| "extractAll";
 
 export type UpgradeRequirement = { upgrade: UpgradeId; level: number };
 
@@ -25,6 +27,8 @@ export const AUTO_EXTRACT_COOLDOWNS_MS = [
 ] as const;
 
 export const AUTO_RESTORE_COOLDOWNS_MS = [8000, 5000, 3000] as const;
+
+export const PROCESS_AUTO_COOLDOWNS_MS = [8000, 4000, 2000] as const;
 
 export const MACHINE_TIER_NAMES = [
 	"CPU upgrade",
@@ -93,6 +97,25 @@ export const upgrades: Record<UpgradeId, UpgradeDef> = {
 				? `max ${COMPUTE_MAX_BASE} c`
 				: `${MACHINE_TIER_NAMES[lvl - 1]} — max ${MACHINE_TIER_COMPUTE_MAX[lvl - 1]} c`,
 	},
+	processAuto: {
+		id: "processAuto",
+		name: "Process automation",
+		description: "Batch-process containers; higher tiers auto-process fragments.",
+		costs: [150, 500, 1500, 4000],
+		effect: (lvl) => {
+			if (lvl === 0) return "off";
+			if (lvl === 1) return "batch button";
+			const ms = PROCESS_AUTO_COOLDOWNS_MS[lvl - 2]!;
+			return `every ${(ms / 1000).toFixed(1)}s`;
+		},
+	},
+	extractAll: {
+		id: "extractAll",
+		name: "Bulk extraction",
+		description: "Adds a toolbar button to extract every ready container at once.",
+		costs: [200],
+		effect: (lvl) => (lvl === 0 ? "off" : "on"),
+	},
 };
 
 export const UPGRADE_IDS: readonly UpgradeId[] = [
@@ -101,4 +124,6 @@ export const UPGRADE_IDS: readonly UpgradeId[] = [
 	"autoRestore",
 	"revealCost",
 	"machineTier",
+	"processAuto",
+	"extractAll",
 ];

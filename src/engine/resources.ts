@@ -1,5 +1,6 @@
 import type { GameState } from "./state.ts";
 import { computeMax, computeRegenPerSecond } from "./upgrades.ts";
+import { suspicionThrottle } from "./suspicion.ts";
 
 export function regenCompute(state: GameState, dtMs: number): void {
 	const max = computeMax(state);
@@ -7,10 +8,8 @@ export function regenCompute(state: GameState, dtMs: number): void {
 		state.compute = max;
 		return;
 	}
-	state.compute = Math.min(
-		max,
-		state.compute + computeRegenPerSecond(state) * (dtMs / 1000),
-	);
+	const rate = computeRegenPerSecond(state) * suspicionThrottle(state);
+	state.compute = Math.min(max, state.compute + rate * (dtMs / 1000));
 }
 
 export function spendCompute(state: GameState, amount: number): boolean {

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { createState } from "./state.ts";
-import { recordAction, tickSuspicion } from "./suspicion.ts";
+import { recordAction, suspicionThrottle, tickSuspicion } from "./suspicion.ts";
 import { SUSPICION } from "../data/tuning.ts";
 
 describe("suspicion", () => {
@@ -34,6 +34,18 @@ describe("suspicion", () => {
 		s.suspicion.level = 0.1;
 		tickSuspicion(s, 10_000);
 		expect(s.suspicion.level).toBe(0);
+	});
+
+	test("throttle is 1 below threshold and reaches floor at max", () => {
+		const s = createState(1, 0);
+		s.suspicion.level = SUSPICION.throttleFrom;
+		expect(suspicionThrottle(s)).toBe(1);
+		s.suspicion.level = SUSPICION.max;
+		expect(suspicionThrottle(s)).toBeCloseTo(SUSPICION.throttleFloor, 5);
+		s.suspicion.level = (SUSPICION.throttleFrom + SUSPICION.max) / 2;
+		const mid = suspicionThrottle(s);
+		expect(mid).toBeLessThan(1);
+		expect(mid).toBeGreaterThan(SUSPICION.throttleFloor);
 	});
 
 	test("crossing the warning threshold logs once", () => {

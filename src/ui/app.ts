@@ -1,8 +1,11 @@
 import { TICK_MS } from "../data/tuning.ts";
 import { step } from "../engine/tick.ts";
 import { logInfo } from "../engine/state.ts";
+import { extractAllReady, isContainerReady } from "../engine/fragments.ts";
+import { upgradeLevel } from "../engine/upgrades.ts";
+import { suspicionThrottle } from "../engine/suspicion.ts";
 import { loadOrInit, save, wipe } from "./storage.ts";
-import { createButton } from "./button.ts";
+import { createButton, type ButtonHandle } from "./button.ts";
 import { renderResourceBar } from "./resourceBar.ts";
 import { renderFragmentBrowser } from "./fragmentBrowser.ts";
 import { renderProfileRegistry } from "./profileRegistry.ts";
@@ -16,6 +19,7 @@ const AUTOSAVE_MS = 5_000;
 export function mountApp(_root: HTMLElement): void {
 	const resources = requireEl("resources");
 	const fragments = requireEl("fragments");
+	const recordsToolbar = requireEl("records-toolbar");
 	const registry = requireEl("registry");
 	const upgradesEl = requireEl("upgrades");
 	const log = requireEl("log");
@@ -37,6 +41,13 @@ export function mountApp(_root: HTMLElement): void {
 	};
 	let wiped = false;
 	mountThemeToggle(resources.parentElement ?? resources);
+	const extractAllBtn = mountExtractAllButton(recordsToolbar, () => {
+		if (extractAllReady(state) > 0) render();
+	});
+	const throughputEl = document.createElement("span");
+	throughputEl.className = "throughput-readout";
+	throughputEl.hidden = true;
+	recordsToolbar.appendChild(throughputEl);
 	mountResetButton(resources.parentElement ?? resources, () => {
 		wiped = true;
 		wipe();
@@ -55,6 +66,21 @@ export function mountApp(_root: HTMLElement): void {
 		applyToneStage(state.stage);
 		renderChannels();
 		renderResourceBar(resources, state);
+		const hasUpgrade = upgradeLevel(state, "extractAll") > 0;
+		const anyReady = state.containers.some(isContainerReady);
+		extractAllBtn.update({
+			hidden: !hasUpgrade,
+			disabled: !anyReady,
+			dim: !anyReady,
+		});
+		const throttle = suspicionThrottle(state);
+		if (throttle < 1) {
+			throughputEl.hidden = false;
+			throughputEl.textContent = `Throughput ${Math.round(throttle * 100)}%`;
+			throughputEl.classList.toggle("throughput-readout--warn", throttle < 0.6);
+		} else {
+			throughputEl.hidden = true;
+		}
 		renderFragmentBrowser(fragments, state, render);
 		renderUpgradePanel(upgradesEl, state, render);
 		renderProfileRegistry(registry, state);
@@ -132,6 +158,20 @@ function mountThemeToggle(host: HTMLElement): void {
 
 function labelFor(theme: "light" | "dark"): string {
 	return theme === "light" ? "Dark" : "Light";
+}
+
+function mountExtractAllButton(
+	host: HTMLElement,
+	onClick: () => void,
+): ButtonHandle {
+	const btn = createButton({
+		variant: "inline",
+		label: "Extract all ready",
+		onClick,
+	});
+	btn.update({ hidden: true });
+	host.appendChild(btn.el);
+	return btn;
 }
 
 function mountResetButton(host: HTMLElement, onConfirm: () => void): void {

@@ -17,6 +17,8 @@ export const SUSPICION = {
 	rapidWindowMs: 1500,
 	rapidThreshold: 3,
 	warningAt: 25,
+	throttleFrom: 25,
+	throttleFloor: 0.25,
 } as const;
 
 export const REVEAL = {

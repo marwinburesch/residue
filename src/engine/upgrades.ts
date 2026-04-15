@@ -3,6 +3,7 @@ import {
 	AUTO_RESTORE_COOLDOWNS_MS,
 	COMPUTE_MAX_BASE,
 	MACHINE_TIER_COMPUTE_MAX,
+	PROCESS_AUTO_COOLDOWNS_MS,
 	REGEN_VALUES,
 	REVEAL_STAGE_COSTS,
 	upgrades as defs,
@@ -61,6 +62,12 @@ export function autoRestoreCooldownMs(state: GameState): number | null {
 	const lvl = upgradeLevel(state, "autoRestore");
 	if (lvl === 0) return null;
 	return AUTO_RESTORE_COOLDOWNS_MS[lvl - 1] ?? null;
+}
+
+export function autoProcessCooldownMs(state: GameState): number | null {
+	const lvl = upgradeLevel(state, "processAuto");
+	if (lvl <= 1) return null;
+	return PROCESS_AUTO_COOLDOWNS_MS[lvl - 2] ?? null;
 }
 
 export function revealStageCost(state: GameState, stage: 0 | 1 | 2): number {

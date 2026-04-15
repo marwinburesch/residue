@@ -20,6 +20,7 @@ import { recordAction } from "./suspicion.ts";
 import { fireMilestone } from "./milestones.ts";
 import {
 	autoExtractCooldownMs,
+	autoProcessCooldownMs,
 	autoRestoreCooldownMs,
 	totalProcessCost,
 } from "./upgrades.ts";
@@ -210,6 +211,45 @@ export function startProcessing(
 	fragment.stageTimer = 0;
 	recordAction(state);
 	return true;
+}
+
+export function processAllInContainer(
+	state: GameState,
+	containerId: number,
+): number {
+	const container = state.containers.find((c) => c.id === containerId);
+	if (!container) return 0;
+	let started = 0;
+	for (const f of container.fragments) {
+		if (f.resolved || f.corrupted || f.processing || f.stage >= 3) continue;
+		if (!startProcessing(state, f.id)) break;
+		started++;
+	}
+	return started;
+}
+
+export function tickAutoProcess(state: GameState, dtMs: number): void {
+	const cooldown = autoProcessCooldownMs(state);
+	if (cooldown === null) return;
+	state.processAutoTimer += dtMs;
+	if (state.processAutoTimer < cooldown) return;
+	state.processAutoTimer = 0;
+	for (const c of state.containers) {
+		for (const f of c.fragments) {
+			if (f.resolved || f.corrupted || f.processing || f.stage >= 3) continue;
+			if (startProcessing(state, f.id)) return;
+			return;
+		}
+	}
+}
+
+export function extractAllReady(state: GameState): number {
+	const snapshot = [...state.containers];
+	let count = 0;
+	for (const c of snapshot) {
+		if (isContainerReady(c) && extractContainer(state, c.id)) count++;
+	}
+	return count;
 }
 
 export function restoreCorrupted(
