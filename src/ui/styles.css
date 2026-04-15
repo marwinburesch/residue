@@ -161,6 +161,27 @@ h2 {
 .fragment-action:disabled { opacity: 0.5; cursor: default; }
 .fragment-action--secondary { border-color: var(--line); color: var(--muted); }
 
+.container-extract {
+  margin-top: 12px;
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font: inherit;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 8px 0;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+.container-card.is-ready .container-extract {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+.container-extract:hover:not(:disabled) { background: var(--ink); color: var(--bg); }
+.container-extract:disabled { cursor: default; }
+
 .profile {
   padding: 10px 0;
   border-top: 1px solid var(--line);

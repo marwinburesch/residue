@@ -3,6 +3,8 @@ import type { Container, Fragment, GameState } from "../engine/state.ts";
 import {
   advanceReveal,
   discardFragment,
+  extractContainer,
+  isContainerReady,
   restoreCorrupted,
 } from "../engine/fragments.ts";
 
@@ -22,7 +24,9 @@ type FragmentView = {
 type ContainerView = {
   card: HTMLElement;
   body: HTMLElement;
+  extractBtn: HTMLButtonElement;
   fragments: Map<number, FragmentView>;
+  lastReady: boolean;
 };
 
 type BrowserView = {
@@ -45,7 +49,7 @@ export function renderFragmentBrowser(
     containerIds.add(container.id);
     let cv = view.containers.get(container.id);
     if (!cv) {
-      cv = createContainerView(container);
+      cv = createContainerView(container, state, onMutate);
       view.containers.set(container.id, cv);
       view.root.appendChild(cv.card);
     }
@@ -73,15 +77,26 @@ function initView(root: HTMLElement): BrowserView {
   return view;
 }
 
-function createContainerView(container: Container): ContainerView {
+function createContainerView(
+  container: Container,
+  state: GameState,
+  onMutate: () => void,
+): ContainerView {
   const card = document.createElement("article");
   card.className = "container-card";
   const title = document.createElement("h3");
   title.textContent = `Receipt #${container.id}`;
   const body = document.createElement("div");
   body.className = "container-body";
-  card.append(title, body);
-  return { card, body, fragments: new Map() };
+  const extractBtn = document.createElement("button");
+  extractBtn.type = "button";
+  extractBtn.className = "container-extract";
+  extractBtn.textContent = "Extract";
+  extractBtn.addEventListener("click", () => {
+    if (extractContainer(state, container.id)) onMutate();
+  });
+  card.append(title, body, extractBtn);
+  return { card, body, extractBtn, fragments: new Map(), lastReady: false };
 }
 
 function syncContainer(
@@ -107,6 +122,12 @@ function syncContainer(
       fv.row.remove();
       cv.fragments.delete(id);
     }
+  }
+  const ready = isContainerReady(container);
+  if (ready !== cv.lastReady) {
+    cv.extractBtn.disabled = !ready;
+    cv.card.classList.toggle("is-ready", ready);
+    cv.lastReady = ready;
   }
 }
 
@@ -185,7 +206,7 @@ function syncFragment(fv: FragmentView, fragment: Fragment): void {
         fv.revealBtn.textContent = `Reveal (${cost}c)`;
         fv.revealBtn.disabled = false;
       } else {
-        fv.revealBtn.textContent = "Extracting…";
+        fv.revealBtn.textContent = "Ready";
         fv.revealBtn.disabled = true;
       }
     }

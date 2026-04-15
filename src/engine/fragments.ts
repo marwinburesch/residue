@@ -113,33 +113,43 @@ export function discardFragment(state: GameState, fragmentId: number): boolean {
   return true;
 }
 
-export function drainExtracted(state: GameState): ExtractedField[][] {
-  const batches: ExtractedField[][] = [];
-  for (const container of state.containers) {
-    const batch: ExtractedField[] = [];
-    for (const f of container.fragments) {
-      if (
-        !f.resolved &&
-        f.stage === 3 &&
-        !f.corrupted &&
-        f.stageTimer >= REVEAL.extractHoldMs
-      ) {
-        batch.push({
-          id: f.id,
-          channel: container.channel,
-          kind: f.kind,
-          value: f.value,
-          corrupted: false,
-          extractedAt: state.now,
-        });
-        f.resolved = true;
-      }
-    }
-    if (batch.length > 0) batches.push(batch);
-  }
-  state.containers = state.containers.filter((c) =>
-    c.fragments.some((f) => !f.resolved),
+export function isContainerReady(container: Container): boolean {
+  return container.fragments.some(
+    (f) => !f.resolved && !f.corrupted && f.stage === 3,
   );
+}
+
+export function extractContainer(state: GameState, containerId: number): boolean {
+  const idx = state.containers.findIndex((c) => c.id === containerId);
+  if (idx === -1) return false;
+  const container = state.containers[idx]!;
+  const batch: ExtractedField[] = [];
+  for (const f of container.fragments) {
+    if (!f.resolved && !f.corrupted && f.stage === 3) {
+      batch.push({
+        id: f.id,
+        channel: container.channel,
+        kind: f.kind,
+        value: f.value,
+        corrupted: false,
+        extractedAt: state.now,
+      });
+      f.resolved = true;
+    }
+  }
+  if (batch.length === 0) return false;
+  const bonus = batch.length * REVEAL.extractBonusDpPerField;
+  state.dp += bonus;
+  state.totalDpEarned += bonus;
+  state.pendingExtractions.push(batch);
+  state.containers.splice(idx, 1);
+  return true;
+}
+
+export function drainExtracted(state: GameState): ExtractedField[][] {
+  if (state.pendingExtractions.length === 0) return [];
+  const batches = state.pendingExtractions;
+  state.pendingExtractions = [];
   return batches;
 }
 

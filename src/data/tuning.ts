@@ -26,7 +26,7 @@ export const REVEAL = {
   corruptionChance: 0.2,
   corruptionRestoreCost: 4,
   corruptionRestoreChance: 0.8,
-  extractHoldMs: 2500,
+  extractBonusDpPerField: 2,
 } as const;
 
 export const PROFILE = {

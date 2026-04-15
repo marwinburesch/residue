@@ -4,6 +4,8 @@ import {
   advanceReveal,
   drainExtracted,
   discardFragment,
+  extractContainer,
+  isContainerReady,
   restoreCorrupted,
   spawnContainer,
   tickChannels,
@@ -72,19 +74,46 @@ describe("reveal", () => {
 });
 
 describe("extraction", () => {
-  test("stage-3 fragments drain as batches and empty containers are cleared", () => {
+  test("extractContainer commits ready fields, awards DP bonus, removes container", () => {
     const s = createState(42, 0);
     const c = spawnContainer(s, "receipts");
+    let ready = 0;
     for (const f of c.fragments) {
       if (!f.corrupted) {
         f.stage = 3;
-        f.stageTimer = REVEAL.extractHoldMs;
-      } else f.resolved = true;
+        ready++;
+      }
     }
+    const dpBefore = s.dp;
+    expect(isContainerReady(c)).toBe(true);
+    expect(extractContainer(s, c.id)).toBe(true);
+    expect(s.containers.length).toBe(0);
+    expect(s.dp).toBe(dpBefore + ready * REVEAL.extractBonusDpPerField);
     const batches = drainExtracted(s);
     expect(batches.length).toBe(1);
-    expect(batches[0]!.length).toBeGreaterThan(0);
+    expect(batches[0]!.length).toBe(ready);
+  });
+
+  test("extractContainer fails when no field is ready", () => {
+    const s = createState(42, 0);
+    const c = spawnContainer(s, "receipts");
+    expect(extractContainer(s, c.id)).toBe(false);
+    expect(s.containers.length).toBe(1);
+  });
+
+  test("extractContainer discards unrevealed and corrupted fragments with the container", () => {
+    const s = createState(42, 0);
+    const c = spawnContainer(s, "receipts");
+    const uncorrupted = c.fragments.find((f) => !f.corrupted);
+    if (!uncorrupted) return;
+    uncorrupted.stage = 3;
+    expect(extractContainer(s, c.id)).toBe(true);
     expect(s.containers.length).toBe(0);
+  });
+
+  test("drainExtracted returns empty when nothing pending", () => {
+    const s = createState(42, 0);
+    expect(drainExtracted(s)).toEqual([]);
   });
 });
 

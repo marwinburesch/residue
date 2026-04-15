@@ -68,6 +68,7 @@ export type GameState = {
   nextId: number;
   channels: Record<ChannelId, ChannelRuntime>;
   containers: Container[];
+  pendingExtractions: ExtractedField[][];
   profiles: Profile[];
   suspicion: SuspicionState;
 };
@@ -85,6 +86,7 @@ export function createState(seed: number, now: number): GameState {
     nextId: 1,
     channels: { receipts: { spawnAccumulator: 0 } },
     containers: [],
+    pendingExtractions: [],
     profiles: [],
     suspicion: { level: 0, recentActions: [], warned: false },
   };

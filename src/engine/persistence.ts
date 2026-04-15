@@ -12,7 +12,11 @@ export function serialize(state: GameState, now: number): string {
 export function deserialize(raw: string): GameState | null {
   try {
     const parsed = JSON.parse(raw) as Partial<GameState>;
-    if (parsed && parsed.version === 1) return parsed as GameState;
+    if (parsed && parsed.version === 1) {
+      const s = parsed as GameState;
+      s.pendingExtractions ??= [];
+      return s;
+    }
     return null;
   } catch {
     return null;
