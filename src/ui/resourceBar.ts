@@ -3,7 +3,7 @@ import { SUSPICION } from "../data/tuning.ts";
 import { computeMax } from "../engine/upgrades.ts";
 
 export function renderResourceBar(root: HTMLElement, state: GameState): void {
-  root.innerHTML = `
+	root.innerHTML = `
     <div class="res">
       <span class="res-label">Compute</span>
       <span class="res-value">${state.compute.toFixed(1)} / ${computeMax(state)}</span>

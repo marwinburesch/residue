@@ -1,15 +1,15 @@
 {
-  "name": "residue",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "bun --hot src/ui/server.ts",
-    "build": "bun build src/main.ts --outdir dist --target browser --minify",
-    "test": "bun test"
-  },
-  "devDependencies": {
-    "@happy-dom/global-registrator": "^20.9.0",
-    "@types/bun": "latest",
-    "typescript": "^5.5.0"
-  }
+	"name": "residue",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "bun --hot src/ui/server.ts",
+		"build": "bun build src/main.ts --outdir dist --target browser --minify",
+		"test": "bun test"
+	},
+	"devDependencies": {
+		"@happy-dom/global-registrator": "^20.9.0",
+		"@types/bun": "latest",
+		"typescript": "^5.5.0"
+	}
 }

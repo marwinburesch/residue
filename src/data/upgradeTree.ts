@@ -34,7 +34,11 @@ export const MACHINE_TIER_NAMES = [
 
 export const MACHINE_TIER_COMPUTE_MAX = [75, 110, 160] as const;
 
-export const REVEAL_STAGE_COSTS: readonly (readonly [number, number, number])[] = [
+export const REVEAL_STAGE_COSTS: readonly (readonly [
+	number,
+	number,
+	number,
+])[] = [
 	[3, 2, 1],
 	[2, 2, 1],
 	[2, 1, 1],
