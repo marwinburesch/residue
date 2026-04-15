@@ -8,9 +8,15 @@ import {
   isContainerReady,
   restoreCorrupted,
   spawnContainer,
+  tickAutoExtract,
+  tickAutoRestore,
   tickChannels,
   tickReveal,
 } from "./fragments.ts";
+import {
+  AUTO_EXTRACT_COOLDOWNS_MS,
+  AUTO_RESTORE_COOLDOWNS_MS,
+} from "../data/upgradeTree.ts";
 import { CHANNEL, REVEAL } from "../data/tuning.ts";
 
 describe("channel spawning", () => {
@@ -159,5 +165,66 @@ describe("corrupted fields", () => {
     if (!f) return;
     expect(discardFragment(s, f.id)).toBe(true);
     expect(f.resolved).toBe(true);
+  });
+});
+
+describe("auto-extract", () => {
+  test("does nothing when upgrade is unpurchased", () => {
+    const s = createState(3, 0);
+    const c = spawnContainer(s, "receipts");
+    for (const f of c.fragments) {
+      f.corrupted = false;
+      f.stage = 3;
+    }
+    tickAutoExtract(s, 60_000);
+    expect(s.containers.length).toBe(1);
+  });
+
+  test("tier 1 extracts a clean container after its cooldown", () => {
+    const s = createState(3, 0);
+    s.upgrades.autoExtract = 1;
+    const c = spawnContainer(s, "receipts");
+    for (const f of c.fragments) {
+      f.corrupted = false;
+      f.stage = 3;
+    }
+    const cd = AUTO_EXTRACT_COOLDOWNS_MS[0]!;
+    tickAutoExtract(s, cd - 1);
+    expect(s.containers.length).toBe(1);
+    tickAutoExtract(s, 2);
+    expect(s.containers.length).toBe(0);
+  });
+
+  test("tier 1 skips containers with any corrupted fragment", () => {
+    const s = createState(3, 0);
+    s.upgrades.autoExtract = 1;
+    const c = spawnContainer(s, "receipts");
+    for (const f of c.fragments) f.stage = 3;
+    c.fragments[0]!.corrupted = true;
+    tickAutoExtract(s, AUTO_EXTRACT_COOLDOWNS_MS[0]! + 1);
+    expect(s.containers.length).toBe(1);
+  });
+});
+
+describe("auto-restore", () => {
+  test("does nothing when upgrade is unpurchased", () => {
+    const s = createState(3, 0);
+    s.compute = 50;
+    spawnContainer(s, "receipts");
+    const before = s.compute;
+    tickAutoRestore(s, 60_000);
+    expect(s.compute).toBe(before);
+  });
+
+  test("spends compute attempting to restore after cooldown", () => {
+    const s = createState(3, 0);
+    s.upgrades.autoRestore = 1;
+    s.compute = 50;
+    const c = spawnContainer(s, "receipts");
+    const corrupted = c.fragments.find((f) => f.corrupted);
+    if (!corrupted) return;
+    const before = s.compute;
+    tickAutoRestore(s, AUTO_RESTORE_COOLDOWNS_MS[0]! + 1);
+    expect(s.compute).toBeLessThan(before);
   });
 });

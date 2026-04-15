@@ -75,6 +75,8 @@ export type GameState = {
   profiles: Profile[];
   suspicion: SuspicionState;
   upgrades: Partial<Record<UpgradeId, number>>;
+  autoExtractTimer: number;
+  autoRestoreTimer: number;
 };
 
 export function createState(seed: number, now: number): GameState {
@@ -94,6 +96,8 @@ export function createState(seed: number, now: number): GameState {
     profiles: [],
     suspicion: { level: 0, recentActions: [], warned: false },
     upgrades: {},
+    autoExtractTimer: 0,
+    autoRestoreTimer: 0,
   };
 }
 

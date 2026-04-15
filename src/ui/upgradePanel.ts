@@ -6,6 +6,7 @@ import {
 import type { GameState } from "../engine/state.ts";
 import {
   canPurchase,
+  isUpgradeUnlocked,
   maxLevel,
   purchaseUpgrade,
   upgradeCost,
@@ -25,6 +26,7 @@ type RowView = {
 
 type PanelView = {
   root: HTMLElement;
+  list: HTMLElement;
   rows: Map<UpgradeId, RowView>;
 };
 
@@ -35,17 +37,21 @@ export function renderUpgradePanel(
   state: GameState,
   onMutate: () => void,
 ): void {
-  const view = views.get(root) ?? initView(root, state, onMutate);
+  const view = views.get(root) ?? initView(root);
   for (const id of UPGRADE_IDS) {
-    syncRow(view.rows.get(id)!, id, state);
+    const unlocked = isUpgradeUnlocked(state, id);
+    let rv = view.rows.get(id);
+    if (!rv) {
+      if (!unlocked) continue;
+      rv = createRow(id, state, onMutate);
+      view.rows.set(id, rv);
+      view.list.appendChild(rv.row);
+    }
+    syncRow(rv, id, state);
   }
 }
 
-function initView(
-  root: HTMLElement,
-  state: GameState,
-  onMutate: () => void,
-): PanelView {
+function initView(root: HTMLElement): PanelView {
   root.innerHTML = "";
   const heading = document.createElement("h2");
   heading.textContent = "Upgrades";
@@ -55,13 +61,7 @@ function initView(
   list.className = "upgrade-list";
   root.appendChild(list);
 
-  const rows = new Map<UpgradeId, RowView>();
-  for (const id of UPGRADE_IDS) {
-    const rv = createRow(id, state, onMutate);
-    rows.set(id, rv);
-    list.appendChild(rv.row);
-  }
-  const view: PanelView = { root, rows };
+  const view: PanelView = { root, list, rows: new Map() };
   views.set(root, view);
   return view;
 }

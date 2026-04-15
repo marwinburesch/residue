@@ -17,7 +17,11 @@ import {
 } from "./state.ts";
 import { spendCompute } from "./resources.ts";
 import { recordAction } from "./suspicion.ts";
-import { containerCap, revealStageCost } from "./upgrades.ts";
+import {
+  autoExtractCooldownMs,
+  autoRestoreCooldownMs,
+  revealStageCost,
+} from "./upgrades.ts";
 
 function rngFor(state: GameState, tag: number): Rng {
   return createRng(state.rngSeed ^ tag);
@@ -105,13 +109,49 @@ export function spawnContainer(state: GameState, channel: ChannelId): Container 
 export function tickChannels(state: GameState, dtMs: number): void {
   const rt = state.channels.receipts;
   rt.spawnAccumulator += (dtMs / 1000) * CHANNEL.receiptsSpawnPerSecond;
-  const cap = containerCap(state);
+  const cap = CHANNEL.receiptsContainerCap;
   while (rt.spawnAccumulator >= 1 && state.containers.length < cap) {
     rt.spawnAccumulator -= 1;
     spawnContainer(state, "receipts");
   }
   if (rt.spawnAccumulator > 1 && state.containers.length >= cap) {
     rt.spawnAccumulator = 1;
+  }
+}
+
+function isContainerClean(container: Container): boolean {
+  let any = false;
+  for (const f of container.fragments) {
+    if (f.resolved) continue;
+    if (f.corrupted) return false;
+    if (f.stage < 3) return false;
+    any = true;
+  }
+  return any;
+}
+
+export function tickAutoExtract(state: GameState, dtMs: number): void {
+  const cooldown = autoExtractCooldownMs(state);
+  if (cooldown === null) return;
+  state.autoExtractTimer += dtMs;
+  if (state.autoExtractTimer < cooldown) return;
+  state.autoExtractTimer = 0;
+  const clean = state.containers.find(isContainerClean);
+  if (clean) extractContainer(state, clean.id);
+}
+
+export function tickAutoRestore(state: GameState, dtMs: number): void {
+  const cooldown = autoRestoreCooldownMs(state);
+  if (cooldown === null) return;
+  state.autoRestoreTimer += dtMs;
+  if (state.autoRestoreTimer < cooldown) return;
+  state.autoRestoreTimer = 0;
+  for (const c of state.containers) {
+    const target = c.fragments.find((f) => f.corrupted && !f.resolved);
+    if (target) {
+      restoreCorrupted(state, target.id);
+      return;
+    }
   }
 }
 

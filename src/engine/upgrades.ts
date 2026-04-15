@@ -1,9 +1,10 @@
 import {
-  REGEN_VALUES,
-  REVEAL_STAGE_COSTS,
-  SLOT_VALUES,
-  upgrades as defs,
-  type UpgradeId,
+	AUTO_EXTRACT_COOLDOWNS_MS,
+	AUTO_RESTORE_COOLDOWNS_MS,
+	REGEN_VALUES,
+	REVEAL_STAGE_COSTS,
+	upgrades as defs,
+	type UpgradeId,
 } from "../data/upgradeTree.ts";
 import { logInfo, type GameState } from "./state.ts";
 
@@ -15,6 +16,12 @@ export function maxLevel(id: UpgradeId): number {
   return defs[id].costs.length;
 }
 
+export function isUpgradeUnlocked(state: GameState, id: UpgradeId): boolean {
+  const req = defs[id].requires;
+  if (!req) return true;
+  return upgradeLevel(state, req.upgrade) >= req.level;
+}
+
 export function upgradeCost(state: GameState, id: UpgradeId): number | null {
   const lvl = upgradeLevel(state, id);
   if (lvl >= maxLevel(id)) return null;
@@ -22,11 +29,13 @@ export function upgradeCost(state: GameState, id: UpgradeId): number | null {
 }
 
 export function canPurchase(state: GameState, id: UpgradeId): boolean {
+  if (!isUpgradeUnlocked(state, id)) return false;
   const cost = upgradeCost(state, id);
   return cost !== null && state.dp >= cost;
 }
 
 export function purchaseUpgrade(state: GameState, id: UpgradeId): boolean {
+  if (!isUpgradeUnlocked(state, id)) return false;
   const cost = upgradeCost(state, id);
   if (cost === null || state.dp < cost) return false;
   state.dp -= cost;
@@ -40,8 +49,16 @@ export function computeRegenPerSecond(state: GameState): number {
   return REGEN_VALUES[upgradeLevel(state, "computeRegen")]!;
 }
 
-export function containerCap(state: GameState): number {
-  return SLOT_VALUES[upgradeLevel(state, "slotExpansion")]!;
+export function autoExtractCooldownMs(state: GameState): number | null {
+	const lvl = upgradeLevel(state, "autoExtract");
+	if (lvl === 0) return null;
+	return AUTO_EXTRACT_COOLDOWNS_MS[lvl - 1] ?? null;
+}
+
+export function autoRestoreCooldownMs(state: GameState): number | null {
+	const lvl = upgradeLevel(state, "autoRestore");
+	if (lvl === 0) return null;
+	return AUTO_RESTORE_COOLDOWNS_MS[lvl - 1] ?? null;
 }
 
 export function revealStageCost(state: GameState, stage: 0 | 1 | 2): number {
