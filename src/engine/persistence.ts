@@ -15,6 +15,7 @@ export function deserialize(raw: string): GameState | null {
     if (parsed && parsed.version === 1) {
       const s = parsed as GameState;
       s.pendingExtractions ??= [];
+      s.upgrades ??= {};
       return s;
     }
     return null;

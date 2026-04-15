@@ -6,6 +6,7 @@ import {
   isContainerReady,
   restoreCorrupted,
 } from "../engine/fragments.ts";
+import { revealStageCost } from "../engine/upgrades.ts";
 
 const GLYPHS = "▓▒░█#@%&*+".split("");
 
@@ -16,6 +17,7 @@ type FragmentView = {
   lastStage: number;
   lastCorrupted: boolean;
   lastResolved: boolean;
+  lastCost: number;
 };
 
 type ContainerView = {
@@ -112,7 +114,7 @@ function syncContainer(
       cv.fragments.set(fragment.id, fv);
       cv.body.appendChild(fv.row);
     }
-    syncFragment(fv, fragment);
+    syncFragment(fv, fragment, state);
   }
   for (const [id, fv] of cv.fragments) {
     if (!liveIds.has(id)) {
@@ -161,31 +163,43 @@ function createFragmentView(
     lastStage: -1,
     lastCorrupted: !fragment.corrupted,
     lastResolved: !fragment.resolved,
+    lastCost: -1,
   };
 }
 
-function syncFragment(fv: FragmentView, fragment: Fragment): void {
+function syncFragment(
+  fv: FragmentView,
+  fragment: Fragment,
+  state: GameState,
+): void {
+  const nextCost =
+    fragment.corrupted
+      ? REVEAL.corruptionRestoreCost
+      : fragment.stage < 3
+        ? revealStageCost(state, fragment.stage as 0 | 1 | 2)
+        : -1;
   if (
-    fv.lastStage !== fragment.stage ||
-    fv.lastCorrupted !== fragment.corrupted
+    fv.lastStage === fragment.stage &&
+    fv.lastCorrupted === fragment.corrupted &&
+    fv.lastCost === nextCost
   ) {
-    fv.valueEl.textContent = obscure(fragment);
-    fv.lastStage = fragment.stage;
-    fv.lastCorrupted = fragment.corrupted;
+    return;
+  }
+  fv.valueEl.textContent = obscure(fragment);
+  fv.lastStage = fragment.stage;
+  fv.lastCorrupted = fragment.corrupted;
+  fv.lastCost = nextCost;
 
-    if (fragment.corrupted) {
-      fv.actionBtn.hidden = false;
-      fv.actionBtn.disabled = false;
-      fv.actionBtn.textContent = `Restore (${REVEAL.corruptionRestoreCost}c)`;
-    } else if (fragment.stage < 3) {
-      const cost =
-        (REVEAL.costPerManualStage as readonly number[])[fragment.stage] ?? 0;
-      fv.actionBtn.hidden = false;
-      fv.actionBtn.disabled = false;
-      fv.actionBtn.textContent = `Reveal (${cost}c)`;
-    } else {
-      fv.actionBtn.hidden = true;
-    }
+  if (fragment.corrupted) {
+    fv.actionBtn.hidden = false;
+    fv.actionBtn.disabled = false;
+    fv.actionBtn.textContent = `Restore (${REVEAL.corruptionRestoreCost}c)`;
+  } else if (fragment.stage < 3) {
+    fv.actionBtn.hidden = false;
+    fv.actionBtn.disabled = false;
+    fv.actionBtn.textContent = `Reveal (${nextCost}c)`;
+  } else {
+    fv.actionBtn.hidden = true;
   }
 }
 

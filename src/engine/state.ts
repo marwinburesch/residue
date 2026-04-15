@@ -1,5 +1,6 @@
 import { COMPUTE } from "../data/tuning.ts";
 import type { ChannelId, FieldKind } from "../data/lootPools.ts";
+import type { UpgradeId } from "../data/upgradeTree.ts";
 
 export type LogEntry = {
   at: number;
@@ -71,6 +72,7 @@ export type GameState = {
   pendingExtractions: ExtractedField[][];
   profiles: Profile[];
   suspicion: SuspicionState;
+  upgrades: Partial<Record<UpgradeId, number>>;
 };
 
 export function createState(seed: number, now: number): GameState {
@@ -89,6 +91,7 @@ export function createState(seed: number, now: number): GameState {
     pendingExtractions: [],
     profiles: [],
     suspicion: { level: 0, recentActions: [], warned: false },
+    upgrades: {},
   };
 }
 

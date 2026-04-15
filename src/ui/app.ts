@@ -5,6 +5,7 @@ import { loadOrInit, save } from "./storage.ts";
 import { renderResourceBar } from "./resourceBar.ts";
 import { renderFragmentBrowser } from "./fragmentBrowser.ts";
 import { renderProfileRegistry } from "./profileRegistry.ts";
+import { renderUpgradePanel } from "./upgradePanel.ts";
 import { renderLog } from "./log.ts";
 
 const AUTOSAVE_MS = 5_000;
@@ -13,6 +14,7 @@ export function mountApp(_root: HTMLElement): void {
   const resources = requireEl("resources");
   const fragments = requireEl("fragments");
   const registry = requireEl("registry");
+  const upgradesEl = requireEl("upgrades");
   const log = requireEl("log");
   const channelsEl = requireEl("channels");
   channelsEl.innerHTML = `
@@ -38,6 +40,7 @@ export function mountApp(_root: HTMLElement): void {
   const render = () => {
     renderResourceBar(resources, state);
     renderFragmentBrowser(fragments, state, render);
+    renderUpgradePanel(upgradesEl, state, render);
     renderProfileRegistry(registry, state);
     renderLog(log, state);
   };

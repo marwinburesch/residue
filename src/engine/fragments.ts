@@ -14,6 +14,7 @@ import {
 } from "./state.ts";
 import { spendCompute } from "./resources.ts";
 import { recordAction } from "./suspicion.ts";
+import { containerCap, revealStageCost } from "./upgrades.ts";
 
 function rngFor(state: GameState, tag: number): Rng {
   return createRng(state.rngSeed ^ tag);
@@ -51,14 +52,12 @@ export function spawnContainer(state: GameState, channel: ChannelId): Container 
 export function tickChannels(state: GameState, dtMs: number): void {
   const rt = state.channels.receipts;
   rt.spawnAccumulator += (dtMs / 1000) * CHANNEL.receiptsSpawnPerSecond;
-  while (
-    rt.spawnAccumulator >= 1 &&
-    state.containers.length < CHANNEL.receiptsContainerCap
-  ) {
+  const cap = containerCap(state);
+  while (rt.spawnAccumulator >= 1 && state.containers.length < cap) {
     rt.spawnAccumulator -= 1;
     spawnContainer(state, "receipts");
   }
-  if (rt.spawnAccumulator > 1 && state.containers.length >= CHANNEL.receiptsContainerCap) {
+  if (rt.spawnAccumulator > 1 && state.containers.length >= cap) {
     rt.spawnAccumulator = 1;
   }
 }
@@ -82,8 +81,7 @@ export function advanceReveal(state: GameState, fragmentId: number): boolean {
   const fragment = findFragment(state, fragmentId);
   if (!fragment || fragment.resolved || fragment.corrupted) return false;
   if (fragment.stage >= 3) return false;
-  const cost =
-    (REVEAL.costPerManualStage as readonly number[])[fragment.stage] ?? 0;
+  const cost = revealStageCost(state, fragment.stage as 0 | 1 | 2);
   if (!spendCompute(state, cost)) return false;
   fragment.stage = (fragment.stage + 1) as RevealStage;
   fragment.stageTimer = 0;
