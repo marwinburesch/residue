@@ -94,6 +94,18 @@ describe("extraction", () => {
     expect(batches[0]!.length).toBe(ready);
   });
 
+  test("isContainerReady is false while any fragment is still revealing", () => {
+    const s = createState(42, 0);
+    const c = spawnContainer(s, "receipts");
+    const uncorrupted = c.fragments.filter((f) => !f.corrupted);
+    if (uncorrupted.length < 2) return;
+    uncorrupted[0]!.stage = 3;
+    uncorrupted[1]!.stage = 1;
+    expect(isContainerReady(c)).toBe(false);
+    uncorrupted[1]!.stage = 3;
+    expect(isContainerReady(c)).toBe(true);
+  });
+
   test("extractContainer fails when no field is ready", () => {
     const s = createState(42, 0);
     const c = spawnContainer(s, "receipts");

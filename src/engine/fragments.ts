@@ -165,9 +165,13 @@ export function discardFragment(state: GameState, fragmentId: number): boolean {
 }
 
 export function isContainerReady(container: Container): boolean {
-  return container.fragments.some(
-    (f) => !f.resolved && !f.corrupted && f.stage === 3,
-  );
+  let hasReady = false;
+  for (const f of container.fragments) {
+    if (f.resolved || f.corrupted) continue;
+    if (f.stage < 3) return false;
+    hasReady = true;
+  }
+  return hasReady;
 }
 
 export function extractContainer(state: GameState, containerId: number): boolean {

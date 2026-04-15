@@ -1,7 +1,8 @@
 import { TICK_MS } from "../data/tuning.ts";
 import { step } from "../engine/tick.ts";
 import { logInfo } from "../engine/state.ts";
-import { loadOrInit, save } from "./storage.ts";
+import { loadOrInit, save, wipe } from "./storage.ts";
+import { createButton } from "./button.ts";
 import { renderResourceBar } from "./resourceBar.ts";
 import { renderFragmentBrowser } from "./fragmentBrowser.ts";
 import { renderProfileRegistry } from "./profileRegistry.ts";
@@ -13,6 +14,7 @@ const AUTOSAVE_MS = 5_000;
 export function mountApp(_root: HTMLElement): void {
   document.body.dataset.toneStage = "0";
   const resources = requireEl("resources");
+  mountResetButton(resources.parentElement ?? resources);
   const fragments = requireEl("fragments");
   const registry = requireEl("registry");
   const upgradesEl = requireEl("upgrades");
@@ -67,6 +69,20 @@ export function mountApp(_root: HTMLElement): void {
   window.addEventListener("beforeunload", () => save(state, Date.now()));
 
   render();
+}
+
+function mountResetButton(host: HTMLElement): void {
+  const btn = createButton({
+    variant: "inline",
+    label: "Reset",
+    onClick: () => {
+      if (!confirm("Wipe save and restart? This cannot be undone.")) return;
+      wipe();
+      location.reload();
+    },
+  });
+  btn.el.classList.add("btn--reset");
+  host.appendChild(btn.el);
 }
 
 function requireEl(id: string): HTMLElement {
