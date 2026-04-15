@@ -14,7 +14,6 @@ const AUTOSAVE_MS = 5_000;
 export function mountApp(_root: HTMLElement): void {
   document.body.dataset.toneStage = "0";
   const resources = requireEl("resources");
-  mountResetButton(resources.parentElement ?? resources);
   const fragments = requireEl("fragments");
   const registry = requireEl("registry");
   const upgradesEl = requireEl("upgrades");
@@ -31,6 +30,12 @@ export function mountApp(_root: HTMLElement): void {
   `;
 
   const { state, offline } = loadOrInit(Date.now());
+  let wiped = false;
+  mountResetButton(resources.parentElement ?? resources, () => {
+    wiped = true;
+    wipe();
+    location.reload();
+  });
   if (offline) {
     logInfo(
       state,
@@ -57,28 +62,29 @@ export function mountApp(_root: HTMLElement): void {
     step(state, dt);
     render();
     const realNow = Date.now();
-    if (realNow - lastSave >= AUTOSAVE_MS) {
+    if (!wiped && realNow - lastSave >= AUTOSAVE_MS) {
       save(state, realNow);
       lastSave = realNow;
     }
   }, TICK_MS);
 
   document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "hidden") save(state, Date.now());
+    if (!wiped && document.visibilityState === "hidden") save(state, Date.now());
   });
-  window.addEventListener("beforeunload", () => save(state, Date.now()));
+  window.addEventListener("beforeunload", () => {
+    if (!wiped) save(state, Date.now());
+  });
 
   render();
 }
 
-function mountResetButton(host: HTMLElement): void {
+function mountResetButton(host: HTMLElement, onConfirm: () => void): void {
   const btn = createButton({
     variant: "inline",
     label: "Reset",
     onClick: () => {
       if (!confirm("Wipe save and restart? This cannot be undone.")) return;
-      wipe();
-      location.reload();
+      onConfirm();
     },
   });
   btn.el.classList.add("btn--reset");

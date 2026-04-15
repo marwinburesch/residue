@@ -19,6 +19,7 @@ type FragmentView = {
   lastCorrupted: boolean;
   lastResolved: boolean;
   lastCost: number;
+  lastAffordable: boolean;
 };
 
 type ContainerView = {
@@ -26,7 +27,7 @@ type ContainerView = {
   body: HTMLElement;
   extractBtn: ButtonHandle;
   fragments: Map<number, FragmentView>;
-  lastReady: boolean;
+  lastReady: boolean | null;
 };
 
 type BrowserView = {
@@ -108,7 +109,7 @@ function createContainerView(
     },
   });
   card.append(title, body, extractBtn.el);
-  return { card, body, extractBtn, fragments: new Map(), lastReady: false };
+  return { card, body, extractBtn, fragments: new Map(), lastReady: null };
 }
 
 function syncContainer(
@@ -137,7 +138,11 @@ function syncContainer(
   }
   const ready = isContainerReady(container);
   if (ready !== cv.lastReady) {
-    cv.extractBtn.update({ disabled: !ready, dim: !ready });
+    cv.extractBtn.update({
+      label: ready ? "Extract" : "Revealing…",
+      disabled: !ready,
+      dim: !ready,
+    });
     cv.card.classList.toggle("is-ready", ready);
     cv.lastReady = ready;
   }
@@ -178,6 +183,7 @@ function createFragmentView(
     lastCorrupted: !fragment.corrupted,
     lastResolved: !fragment.resolved,
     lastCost: -1,
+    lastAffordable: false,
   };
 }
 
@@ -192,29 +198,36 @@ function syncFragment(
       : fragment.stage < 3
         ? revealStageCost(state, fragment.stage as 0 | 1 | 2)
         : -1;
+  const affordable = nextCost >= 0 && state.compute >= nextCost;
   if (
     fv.lastStage === fragment.stage &&
     fv.lastCorrupted === fragment.corrupted &&
-    fv.lastCost === nextCost
+    fv.lastCost === nextCost &&
+    fv.lastAffordable === affordable
   ) {
     return;
   }
-  fv.valueEl.textContent = obscure(fragment);
+  const visualDirty =
+    fv.lastStage !== fragment.stage || fv.lastCorrupted !== fragment.corrupted;
+  if (visualDirty) fv.valueEl.textContent = obscure(fragment);
   fv.lastStage = fragment.stage;
   fv.lastCorrupted = fragment.corrupted;
   fv.lastCost = nextCost;
+  fv.lastAffordable = affordable;
 
   if (fragment.corrupted) {
     fv.actionBtn.update({
       hidden: false,
-      disabled: false,
+      disabled: !affordable,
+      dim: !affordable,
       label: "Restore",
       cost: { amount: REVEAL.corruptionRestoreCost, unit: "c" },
     });
   } else if (fragment.stage < 3) {
     fv.actionBtn.update({
       hidden: false,
-      disabled: false,
+      disabled: !affordable,
+      dim: !affordable,
       label: "Reveal",
       cost: { amount: nextCost, unit: "c" },
     });
@@ -225,7 +238,10 @@ function syncFragment(
 
 function obscure(fragment: Fragment): string {
   if (fragment.corrupted) return "░░ corrupted ░░";
-  const visibleChars = Math.floor((fragment.stage / 3) * fragment.value.length);
+  const visibleChars =
+    fragment.stage >= 3
+      ? fragment.value.length
+      : Math.ceil((fragment.stage / 3) * fragment.value.length);
   let out = "";
   for (let i = 0; i < fragment.value.length; i++) {
     if (i < visibleChars) {
