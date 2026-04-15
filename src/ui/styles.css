@@ -64,6 +64,7 @@ body {
 	display: flex;
 	align-items: baseline;
 	gap: 16px;
+	background-color: oklch(88% 0.011 106.6);
 }
 
 .brand {
