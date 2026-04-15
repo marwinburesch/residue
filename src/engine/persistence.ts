@@ -18,6 +18,7 @@ export function deserialize(raw: string): GameState | null {
       s.upgrades ??= {};
       s.autoExtractTimer ??= 0;
       s.autoRestoreTimer ??= 0;
+      s.milestonesFired ??= [];
       return s;
     }
     return null;

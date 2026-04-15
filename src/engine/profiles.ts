@@ -2,6 +2,7 @@ import { DP, PROFILE } from "../data/tuning.ts";
 import type { ExtractedField, GameState, Profile, ProfileTier } from "./state.ts";
 import { logInfo, nextId } from "./state.ts";
 import { awardDp } from "./resources.ts";
+import { fireMilestone } from "./milestones.ts";
 
 const IDENTITY_KINDS = ["name", "loyaltyId"] as const;
 
@@ -19,8 +20,10 @@ export function ingestBatch(state: GameState, batch: ExtractedField[]): void {
   profile.tier = tierFor(profile);
   if (!match) {
     logInfo(state, `[INFO] Entity extracted: profile #${profile.id}.`);
+    if (state.profiles.length === 5) fireMilestone(state, "fifthProfile");
   } else if (prevTier !== profile.tier && profile.tier === "outline") {
     logInfo(state, `[INFO] Profile #${profile.id} resolved to outline tier.`);
+    fireMilestone(state, "firstOutline");
   }
 }
 

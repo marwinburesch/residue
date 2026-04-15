@@ -17,6 +17,7 @@ import {
 } from "./state.ts";
 import { spendCompute } from "./resources.ts";
 import { recordAction } from "./suspicion.ts";
+import { fireMilestone } from "./milestones.ts";
 import {
   autoExtractCooldownMs,
   autoRestoreCooldownMs,
@@ -84,6 +85,8 @@ export function spawnContainer(state: GameState, channel: ChannelId): Container 
     if (!fieldDef.allowMultiple) usedKinds.add(fieldDef.kind);
     const value = fieldValue(rng, fieldDef, person);
     if (value === null) continue;
+    const corrupted = rng() < REVEAL.corruptionChance;
+    if (corrupted) fireMilestone(state, "firstCorruptedField");
     fragments.push({
       id: nextId(state),
       kind: fieldDef.kind,
@@ -91,7 +94,7 @@ export function spawnContainer(state: GameState, channel: ChannelId): Container 
       value,
       stage: 0,
       stageTimer: 0,
-      corrupted: rng() < REVEAL.corruptionChance,
+      corrupted,
       resolved: false,
     });
   }
@@ -164,7 +167,10 @@ export function tickReveal(state: GameState, dtMs: number): void {
       while (f.stageTimer >= REVEAL.stageAdvanceMs && f.stage < 3) {
         f.stageTimer -= REVEAL.stageAdvanceMs;
         f.stage = (f.stage + 1) as RevealStage;
-        if (f.stage === 3) f.stageTimer = 0;
+        if (f.stage === 3) {
+          f.stageTimer = 0;
+          fireMilestone(state, "firstFragmentOpened");
+        }
       }
     }
   }
@@ -179,6 +185,7 @@ export function advanceReveal(state: GameState, fragmentId: number): boolean {
   if (!spendCompute(state, cost)) return false;
   fragment.stage = 3;
   fragment.stageTimer = 0;
+  fireMilestone(state, "firstFragmentOpened");
   recordAction(state);
   return true;
 }

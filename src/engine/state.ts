@@ -2,6 +2,7 @@ import { COMPUTE } from "../data/tuning.ts";
 import type { Rarity } from "../data/tuning.ts";
 import type { ChannelId, FieldKind } from "../data/lootPools.ts";
 import type { UpgradeId } from "../data/upgradeTree.ts";
+import type { MilestoneKey } from "../data/narrative.ts";
 
 export type LogEntry = {
   at: number;
@@ -77,6 +78,7 @@ export type GameState = {
   upgrades: Partial<Record<UpgradeId, number>>;
   autoExtractTimer: number;
   autoRestoreTimer: number;
+  milestonesFired: MilestoneKey[];
 };
 
 export function createState(seed: number, now: number): GameState {
@@ -98,6 +100,7 @@ export function createState(seed: number, now: number): GameState {
     upgrades: {},
     autoExtractTimer: 0,
     autoRestoreTimer: 0,
+    milestonesFired: [],
   };
 }
 
