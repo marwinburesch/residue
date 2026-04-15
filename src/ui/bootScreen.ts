@@ -34,10 +34,8 @@ export function showBootScreen(): Promise<void> {
 
     btn.addEventListener("click", () => {
       overlay.classList.add("boot-screen--leaving");
-      setTimeout(() => {
-        overlay.remove();
-        resolve();
-      }, 200);
+      setTimeout(() => overlay.remove(), 200);
+      resolve();
     });
   });
 }
