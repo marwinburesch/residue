@@ -2,7 +2,8 @@ export type UpgradeId =
 	| "computeRegen"
 	| "autoExtract"
 	| "autoRestore"
-	| "revealCost";
+	| "revealCost"
+	| "machineTier";
 
 export type UpgradeRequirement = { upgrade: UpgradeId; level: number };
 
@@ -15,6 +16,8 @@ export type UpgradeDef = {
 	requires?: UpgradeRequirement;
 };
 
+export const COMPUTE_MAX_BASE = 50;
+
 export const REGEN_VALUES = [0.5, 0.8, 1.2, 2.0] as const;
 
 export const AUTO_EXTRACT_COOLDOWNS_MS = [
@@ -22,6 +25,14 @@ export const AUTO_EXTRACT_COOLDOWNS_MS = [
 ] as const;
 
 export const AUTO_RESTORE_COOLDOWNS_MS = [8000, 5000, 3000] as const;
+
+export const MACHINE_TIER_NAMES = [
+	"CPU upgrade",
+	"Expansion slot",
+	"Co-processor",
+] as const;
+
+export const MACHINE_TIER_COMPUTE_MAX = [75, 110, 160] as const;
 
 export const REVEAL_STAGE_COSTS: readonly (readonly [number, number, number])[] = [
 	[3, 2, 1],
@@ -68,6 +79,16 @@ export const upgrades: Record<UpgradeId, UpgradeDef> = {
 		costs: [60, 150, 360],
 		effect: (lvl) => REVEAL_STAGE_COSTS[lvl]!.join(" / "),
 	},
+	machineTier: {
+		id: "machineTier",
+		name: "Rig expansion",
+		description: "Physical hardware. Raises max Compute.",
+		costs: [120, 300, 750],
+		effect: (lvl) =>
+			lvl === 0
+				? `max ${COMPUTE_MAX_BASE} c`
+				: `${MACHINE_TIER_NAMES[lvl - 1]} — max ${MACHINE_TIER_COMPUTE_MAX[lvl - 1]} c`,
+	},
 };
 
 export const UPGRADE_IDS: readonly UpgradeId[] = [
@@ -75,4 +96,5 @@ export const UPGRADE_IDS: readonly UpgradeId[] = [
 	"autoExtract",
 	"autoRestore",
 	"revealCost",
+	"machineTier",
 ];

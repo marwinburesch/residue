@@ -1,6 +1,8 @@
 import {
 	AUTO_EXTRACT_COOLDOWNS_MS,
 	AUTO_RESTORE_COOLDOWNS_MS,
+	COMPUTE_MAX_BASE,
+	MACHINE_TIER_COMPUTE_MAX,
 	REGEN_VALUES,
 	REVEAL_STAGE_COSTS,
 	upgrades as defs,
@@ -63,4 +65,10 @@ export function autoRestoreCooldownMs(state: GameState): number | null {
 
 export function revealStageCost(state: GameState, stage: 0 | 1 | 2): number {
   return REVEAL_STAGE_COSTS[upgradeLevel(state, "revealCost")]![stage]!;
+}
+
+export function computeMax(state: GameState): number {
+  const lvl = upgradeLevel(state, "machineTier");
+  if (lvl === 0) return COMPUTE_MAX_BASE;
+  return MACHINE_TIER_COMPUTE_MAX[lvl - 1]!;
 }

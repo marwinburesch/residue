@@ -2,7 +2,6 @@ export const TICK_MS = 250;
 
 export const COMPUTE = {
 	startingAmount: 10,
-	max: 50,
 	regenPerSecond: 0.5,
 } as const;
 

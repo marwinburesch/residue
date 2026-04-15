@@ -1,14 +1,14 @@
-import { COMPUTE } from "../data/tuning.ts";
 import type { GameState } from "./state.ts";
-import { computeRegenPerSecond } from "./upgrades.ts";
+import { computeMax, computeRegenPerSecond } from "./upgrades.ts";
 
 export function regenCompute(state: GameState, dtMs: number): void {
-  if (state.compute >= COMPUTE.max) {
-    state.compute = COMPUTE.max;
+  const max = computeMax(state);
+  if (state.compute >= max) {
+    state.compute = max;
     return;
   }
   state.compute = Math.min(
-    COMPUTE.max,
+    max,
     state.compute + computeRegenPerSecond(state) * (dtMs / 1000),
   );
 }

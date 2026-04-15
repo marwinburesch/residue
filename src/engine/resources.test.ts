@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { createState } from "./state.ts";
 import { awardDp, regenCompute, spendCompute } from "./resources.ts";
 import { COMPUTE } from "../data/tuning.ts";
+import { COMPUTE_MAX_BASE } from "../data/upgradeTree.ts";
 
 describe("compute", () => {
   test("regens at the configured rate", () => {
@@ -13,9 +14,9 @@ describe("compute", () => {
 
   test("regen is capped at max", () => {
     const s = createState(1, 0);
-    s.compute = COMPUTE.max - 0.01;
+    s.compute = COMPUTE_MAX_BASE - 0.01;
     regenCompute(s, 10_000);
-    expect(s.compute).toBe(COMPUTE.max);
+    expect(s.compute).toBe(COMPUTE_MAX_BASE);
   });
 
   test("spend returns false when insufficient and does not deduct", () => {

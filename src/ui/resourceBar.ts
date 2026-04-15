@@ -1,11 +1,12 @@
 import type { GameState } from "../engine/state.ts";
-import { COMPUTE, SUSPICION } from "../data/tuning.ts";
+import { SUSPICION } from "../data/tuning.ts";
+import { computeMax } from "../engine/upgrades.ts";
 
 export function renderResourceBar(root: HTMLElement, state: GameState): void {
   root.innerHTML = `
     <div class="res">
       <span class="res-label">Compute</span>
-      <span class="res-value">${state.compute.toFixed(1)} / ${COMPUTE.max}</span>
+      <span class="res-value">${state.compute.toFixed(1)} / ${computeMax(state)}</span>
     </div>
     <div class="res">
       <span class="res-label">Data points</span>
