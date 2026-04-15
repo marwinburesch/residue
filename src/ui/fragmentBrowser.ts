@@ -289,7 +289,7 @@ function syncFragment(
       label: "Restore",
       cost: { amount: REVEAL.corruptionRestoreCost, unit: "c" },
     });
-  } else if (fragment.stage < 3) {
+  } else if (fragment.stage < 3 && nextCost > 1) {
     fv.actionBtn.update({
       hidden: false,
       disabled: !affordable,

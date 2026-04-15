@@ -42,7 +42,7 @@ describe("reveal", () => {
     expect(uncorrupted.stage).toBe(3);
   });
 
-  test("manual advance charges Compute per stage", () => {
+  test("manual advance fully reveals and charges current stage cost", () => {
     const s = createState(42, 0);
     const c = spawnContainer(s, "receipts");
     const uncorrupted = c.fragments.find((f) => !f.corrupted);
@@ -50,7 +50,19 @@ describe("reveal", () => {
     const before = s.compute;
     expect(advanceReveal(s, uncorrupted.id)).toBe(true);
     expect(s.compute).toBe(before - REVEAL.costPerManualStage[0]);
-    expect(uncorrupted.stage).toBe(1);
+    expect(uncorrupted.stage).toBe(3);
+  });
+
+  test("manual advance unavailable when cost is 1", () => {
+    const s = createState(42, 0);
+    const c = spawnContainer(s, "receipts");
+    const uncorrupted = c.fragments.find((f) => !f.corrupted);
+    if (!uncorrupted) return;
+    uncorrupted.stage = 2;
+    const before = s.compute;
+    expect(advanceReveal(s, uncorrupted.id)).toBe(false);
+    expect(s.compute).toBe(before);
+    expect(uncorrupted.stage).toBe(2);
   });
 
   test("manual advance fails when Compute is insufficient", () => {

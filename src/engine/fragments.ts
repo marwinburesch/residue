@@ -135,8 +135,9 @@ export function advanceReveal(state: GameState, fragmentId: number): boolean {
   if (!fragment || fragment.resolved || fragment.corrupted) return false;
   if (fragment.stage >= 3) return false;
   const cost = revealStageCost(state, fragment.stage as 0 | 1 | 2);
+  if (cost <= 1) return false;
   if (!spendCompute(state, cost)) return false;
-  fragment.stage = (fragment.stage + 1) as RevealStage;
+  fragment.stage = 3;
   fragment.stageTimer = 0;
   recordAction(state);
   return true;
