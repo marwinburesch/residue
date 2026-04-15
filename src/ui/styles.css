@@ -467,3 +467,46 @@ h2 {
 		grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
 	}
 }
+
+.boot-screen {
+	position: fixed;
+	inset: 0;
+	background: #0c0c0c;
+	color: #d4d4d4;
+	font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+	display: grid;
+	place-items: center;
+	z-index: 100;
+	transition: opacity 0.2s ease-out;
+}
+.boot-screen--leaving {
+	opacity: 0;
+}
+.boot-inner {
+	width: min(640px, 90vw);
+	padding: 2rem;
+}
+.boot-log {
+	margin: 0 0 2rem 0;
+	white-space: pre-wrap;
+	font-size: 13px;
+	line-height: 1.6;
+	min-height: 10rem;
+}
+.boot-begin {
+	background: none;
+	border: 1px solid #d4d4d4;
+	color: #d4d4d4;
+	font-family: inherit;
+	font-size: 13px;
+	padding: 0.5rem 1rem;
+	cursor: pointer;
+}
+.boot-begin:disabled {
+	opacity: 0.3;
+	cursor: default;
+}
+.boot-begin:not(:disabled):hover {
+	background: #d4d4d4;
+	color: #0c0c0c;
+}

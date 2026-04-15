@@ -1,3 +1,4 @@
 import { mountApp } from "./ui/app.ts";
+import { showBootScreen } from "./ui/bootScreen.ts";
 
-mountApp(document.body);
+showBootScreen().then(() => mountApp(document.body));
