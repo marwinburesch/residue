@@ -8,11 +8,11 @@ import { renderFragmentBrowser } from "./fragmentBrowser.ts";
 import { renderProfileRegistry } from "./profileRegistry.ts";
 import { renderUpgradePanel } from "./upgradePanel.ts";
 import { renderLog } from "./log.ts";
+import { applyToneStage } from "./toneController.ts";
 
 const AUTOSAVE_MS = 5_000;
 
 export function mountApp(_root: HTMLElement): void {
-  document.body.dataset.toneStage = "0";
   const resources = requireEl("resources");
   const fragments = requireEl("fragments");
   const registry = requireEl("registry");
@@ -48,6 +48,7 @@ export function mountApp(_root: HTMLElement): void {
   }
 
   const render = () => {
+    applyToneStage(state.stage);
     renderResourceBar(resources, state);
     renderFragmentBrowser(fragments, state, render);
     renderUpgradePanel(upgradesEl, state, render);

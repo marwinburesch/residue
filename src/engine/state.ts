@@ -3,6 +3,7 @@ import type { Rarity } from "../data/tuning.ts";
 import type { ChannelId, FieldKind } from "../data/lootPools.ts";
 import type { UpgradeId } from "../data/upgradeTree.ts";
 import type { MilestoneKey } from "../data/narrative.ts";
+import type { StageId } from "../data/stageConfig.ts";
 
 export type LogEntry = {
   at: number;
@@ -79,6 +80,7 @@ export type GameState = {
   autoExtractTimer: number;
   autoRestoreTimer: number;
   milestonesFired: MilestoneKey[];
+  stage: StageId;
 };
 
 export function createState(seed: number, now: number): GameState {
@@ -101,6 +103,7 @@ export function createState(seed: number, now: number): GameState {
     autoExtractTimer: 0,
     autoRestoreTimer: 0,
     milestonesFired: [],
+    stage: 0,
   };
 }
 

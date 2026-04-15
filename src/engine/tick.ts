@@ -9,6 +9,7 @@ import {
 } from "./fragments.ts";
 import { ingestBatch, tickProfileDp } from "./profiles.ts";
 import { tickSuspicion } from "./suspicion.ts";
+import { advanceStageIfReady } from "./stages.ts";
 
 export function step(state: GameState, dtMs: number): void {
   if (dtMs <= 0) return;
@@ -21,4 +22,5 @@ export function step(state: GameState, dtMs: number): void {
   for (const batch of drainExtracted(state)) ingestBatch(state, batch);
   tickProfileDp(state, dtMs);
   tickSuspicion(state, dtMs);
+  advanceStageIfReady(state);
 }

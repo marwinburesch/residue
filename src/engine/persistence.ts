@@ -19,6 +19,7 @@ export function deserialize(raw: string): GameState | null {
       s.autoExtractTimer ??= 0;
       s.autoRestoreTimer ??= 0;
       s.milestonesFired ??= [];
+      s.stage ??= 0;
       return s;
     }
     return null;
