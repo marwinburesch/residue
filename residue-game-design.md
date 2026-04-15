@@ -13,6 +13,7 @@ Residue is a browser-based incremental game built with vanilla HTML/CSS/JS (or a
 3. **Profile assembly** — fragments link across sources into person-profiles; completeness drives progression.
 4. **Suspicion pacing** — a global pressure valve that enforces slow play and creates risk/reward tension.
 5. **Tone drift** — the UI, language, and music gradually shift from sterile corporate tool to something uncanny.
+6. **Keep players in the dark** - reveal new UI or features gradually to amke it more mysterious.
 
 ---
 
