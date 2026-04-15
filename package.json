@@ -8,6 +8,7 @@
     "test": "bun test"
   },
   "devDependencies": {
+    "@happy-dom/global-registrator": "^20.9.0",
     "@types/bun": "latest",
     "typescript": "^5.5.0"
   }
