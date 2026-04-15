@@ -510,3 +510,16 @@ h2 {
 	background: #d4d4d4;
 	color: #0c0c0c;
 }
+
+body[data-tone-stage="1"] {
+	--bg: #f4f1ea;
+	--card: #f0ece3;
+}
+body[data-tone-stage="1"] #log {
+	font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+	font-size: 12.5px;
+}
+body[data-tone-stage="1"] #topbar .subtitle {
+	font-weight: 600;
+	letter-spacing: 0.01em;
+}
