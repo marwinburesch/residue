@@ -83,9 +83,20 @@ function createContainerView(
   onMutate: () => void,
 ): ContainerView {
   const card = document.createElement("article");
-  card.className = "container-card";
+  card.className = `container-card rarity-${container.rarity ?? "common"}`;
   const title = document.createElement("h3");
   title.textContent = `Receipt #${container.id}`;
+  if (container.rarity && container.rarity !== "common") {
+    const badge = document.createElement("span");
+    badge.className = "rarity-badge";
+    const dot = document.createElement("span");
+    dot.className = "rarity-dot";
+    const label = document.createElement("span");
+    label.className = "rarity-label";
+    label.textContent = container.rarity;
+    badge.append(dot, label);
+    card.appendChild(badge);
+  }
   const body = document.createElement("div");
   body.className = "container-body";
   const extractBtn = createButton({

@@ -1,4 +1,5 @@
 import { COMPUTE } from "../data/tuning.ts";
+import type { Rarity } from "../data/tuning.ts";
 import type { ChannelId, FieldKind } from "../data/lootPools.ts";
 import type { UpgradeId } from "../data/upgradeTree.ts";
 
@@ -25,6 +26,7 @@ export type Container = {
   id: number;
   channel: ChannelId;
   spawnedAt: number;
+  rarity: Rarity;
   fragments: Fragment[];
 };
 

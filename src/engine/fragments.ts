@@ -1,6 +1,9 @@
-import { CHANNEL, REVEAL } from "../data/tuning.ts";
+import { CHANNEL, RARITY, RARITY_TIERS, REVEAL } from "../data/tuning.ts";
+import type { Rarity } from "../data/tuning.ts";
 import { channels as channelDefs } from "../data/lootPools.ts";
-import type { ChannelId } from "../data/lootPools.ts";
+import type { ChannelId, FieldDef, FieldKind } from "../data/lootPools.ts";
+import { people } from "../data/people.ts";
+import type { Person } from "../data/people.ts";
 import { pick, pickWeighted, createRng } from "./rng.ts";
 import type { Rng } from "./rng.ts";
 import {
@@ -20,19 +23,68 @@ function rngFor(state: GameState, tag: number): Rng {
   return createRng(state.rngSeed ^ tag);
 }
 
+function rollRarity(rng: Rng): Rarity {
+  const entries = RARITY_TIERS.map((r) => ({ rarity: r, weight: RARITY.weights[r] }));
+  return pickWeighted(rng, entries).rarity;
+}
+
+function isCoherent(rarity: Rarity): boolean {
+  return RARITY_TIERS.indexOf(rarity) >= RARITY_TIERS.indexOf(RARITY.coherentFrom);
+}
+
+function personValueFor(kind: FieldKind, person: Person): string | null {
+  switch (kind) {
+    case "name": return person.name;
+    case "email": return person.email;
+    case "postcode": return person.postcode;
+    case "loyaltyId": return person.loyaltyId;
+    case "paymentLast4": return person.paymentLast4;
+    default: return null;
+  }
+}
+
+function fieldValue(
+  rng: Rng,
+  def: FieldDef,
+  person: Person | null,
+): string | null {
+  if (person) {
+    const v = personValueFor(def.kind, person);
+    if (v !== null) return v;
+  }
+  if (def.requiresPerson) return null;
+  if (def.samples.length === 0) return null;
+  return pick(rng, def.samples);
+}
+
 export function spawnContainer(state: GameState, channel: ChannelId): Container {
   const def = channelDefs[channel];
   const rng = rngFor(state, state.nextId * 2654435761);
-  const [min, max] = def.fieldsPerContainer;
-  const count = min + Math.floor(rng() * (max - min + 1));
+  const rarity = rollRarity(rng);
+  const person = isCoherent(rarity) ? pick(rng, people) : null;
+
+  const eligiblePool = def.pool.filter((p) => !p.requiresPerson || person !== null);
+  const [min, max] = RARITY.fields[rarity];
+  const maxUnique =
+    eligiblePool.filter((p) => !p.allowMultiple).length +
+    (eligiblePool.some((p) => p.allowMultiple) ? Infinity : 0);
+  const target = min + Math.floor(rng() * (max - min + 1));
+  const count = Math.min(target, maxUnique);
+
   const fragments: Fragment[] = [];
+  const usedKinds = new Set<string>();
   for (let i = 0; i < count; i++) {
-    const fieldDef = pickWeighted(rng, def.pool);
+    const remaining = eligiblePool.filter((p) => !usedKinds.has(p.kind));
+    if (remaining.length === 0) break;
+    const fieldDef = pickWeighted(rng, remaining);
+    if (!fieldDef.allowMultiple) usedKinds.add(fieldDef.kind);
+    const value = fieldValue(rng, fieldDef, person);
+    if (value === null) continue;
     fragments.push({
       id: nextId(state),
       kind: fieldDef.kind,
       label: fieldDef.label,
-      value: pick(rng, fieldDef.samples),
+      value,
       stage: 0,
       stageTimer: 0,
       corrupted: rng() < REVEAL.corruptionChance,
@@ -43,6 +95,7 @@ export function spawnContainer(state: GameState, channel: ChannelId): Container 
     id: nextId(state),
     channel,
     spawnedAt: state.now,
+    rarity,
     fragments,
   };
   state.containers.push(container);

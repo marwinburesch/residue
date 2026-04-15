@@ -173,12 +173,38 @@ h2 {
 .channel-meta { color: var(--muted); font-size: 11px; }
 
 .container-card {
+  position: relative;
   background: var(--card);
   border: 1px solid var(--line);
   padding: 12px 14px;
   display: flex;
   flex-direction: column;
 }
+
+.rarity-badge {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.rarity-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.rarity-uncommon  .rarity-badge { color: #3a9a3a; }
+.rarity-rare      .rarity-badge { color: #2b6cb0; }
+.rarity-epic      .rarity-badge { color: #7a3ab0; }
+.rarity-legendary .rarity-badge { color: #c4a000; }
+.rarity-mythic    .rarity-badge { color: #1aa6a6; }
 .container-card h3 {
   margin: 0 0 10px;
   font-size: 12px;

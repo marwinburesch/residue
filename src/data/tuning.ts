@@ -39,6 +39,40 @@ export const CHANNEL = {
   receiptsContainerCap: 6,
 } as const;
 
+export const RARITY_TIERS = [
+  "common",
+  "uncommon",
+  "rare",
+  "epic",
+  "legendary",
+  "mythic",
+] as const;
+export type Rarity = (typeof RARITY_TIERS)[number];
+
+export const RARITY: {
+  weights: Record<Rarity, number>;
+  fields: Record<Rarity, readonly [min: number, max: number]>;
+  coherentFrom: Rarity;
+} = {
+  weights: {
+    common: 600,
+    uncommon: 250,
+    rare: 100,
+    epic: 40,
+    legendary: 8,
+    mythic: 2,
+  },
+  fields: {
+    common: [2, 3],
+    uncommon: [3, 4],
+    rare: [4, 5],
+    epic: [5, 6],
+    legendary: [6, 7],
+    mythic: [7, 7],
+  },
+  coherentFrom: "uncommon",
+};
+
 export const OFFLINE = {
   minIdleMs: 60_000,
   capMs: 8 * 60 * 60 * 1000,
