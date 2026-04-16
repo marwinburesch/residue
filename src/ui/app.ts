@@ -10,6 +10,7 @@ import { renderResourceBar } from "./resourceBar.ts";
 import { renderFragmentBrowser } from "./fragmentBrowser.ts";
 import { renderProfileRegistry } from "./profileRegistry.ts";
 import { renderUpgradePanel } from "./upgradePanel.ts";
+import { renderAutomationChips } from "./automationsPanel.ts";
 import { renderLog } from "./log.ts";
 import { applyToneStage } from "./toneController.ts";
 import { loadTheme, toggleTheme } from "./themeController.ts";
@@ -44,6 +45,9 @@ export function mountApp(_root: HTMLElement): void {
 	const extractAllBtn = mountExtractAllButton(recordsToolbar, () => {
 		if (extractAllReady(state) > 0) render();
 	});
+	const automationChipsEl = document.createElement("span");
+	automationChipsEl.className = "auto-chips";
+	recordsToolbar.appendChild(automationChipsEl);
 	const throughputEl = document.createElement("span");
 	throughputEl.className = "throughput-readout";
 	throughputEl.hidden = true;
@@ -82,6 +86,7 @@ export function mountApp(_root: HTMLElement): void {
 			throughputEl.hidden = true;
 		}
 		renderFragmentBrowser(fragments, state, render);
+		renderAutomationChips(automationChipsEl, state);
 		renderUpgradePanel(upgradesEl, state, render);
 		renderProfileRegistry(registry, state);
 		renderLog(log, state);
