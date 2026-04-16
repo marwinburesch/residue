@@ -29,11 +29,15 @@ export function mountApp(_root: HTMLElement): void {
 	mountTabs(tabsEl);
 
 	const { state, offline } = loadOrInit(Date.now());
+	let lastCorkboard: boolean | null = null;
 	const renderChannels = () => {
+		const corkboard = !!state.channels.corkboard;
+		if (corkboard === lastCorkboard) return;
+		lastCorkboard = corkboard;
 		const items = [
 			`<li class="channel channel--active"><span class="channel-name">Discarded receipts</span><span class="channel-meta">Active</span></li>`,
 		];
-		if (state.channels.corkboard) {
+		if (corkboard) {
 			items.push(
 				`<li class="channel channel--active"><span class="channel-name">Corkboard notes</span><span class="channel-meta">Active</span></li>`,
 			);
@@ -99,13 +103,18 @@ export function mountApp(_root: HTMLElement): void {
 		const dt = now - lastTick;
 		lastTick = now;
 		step(state, dt);
-		render();
 		const realNow = Date.now();
 		if (!wiped && realNow - lastSave >= AUTOSAVE_MS) {
 			save(state, realNow);
 			lastSave = realNow;
 		}
 	}, TICK_MS);
+
+	const frame = () => {
+		render();
+		requestAnimationFrame(frame);
+	};
+	requestAnimationFrame(frame);
 
 	document.addEventListener("visibilitychange", () => {
 		if (!wiped && document.visibilityState === "hidden")

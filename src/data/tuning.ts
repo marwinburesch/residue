@@ -1,4 +1,4 @@
-export const TICK_MS = 250;
+export const TICK_MS = 50;
 
 export const COMPUTE = {
 	startingAmount: 10,
