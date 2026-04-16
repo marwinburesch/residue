@@ -4,7 +4,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "bun --hot src/ui/server.ts",
-		"build": "bun build src/main.ts --outdir dist --target browser --minify",
+		"build": "bun build src/main.ts --outdir dist --target browser --minify && bun run scripts/copyStatic.ts",
 		"test": "bun test"
 	},
 	"devDependencies": {
