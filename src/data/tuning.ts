@@ -24,7 +24,6 @@ export const SUSPICION = {
 export const REVEAL = {
 	stageAdvanceMs: 2500,
 	costPerManualStage: [3, 2, 1] as const,
-	corruptionChance: 0.2,
 	corruptionRestoreCost: 4,
 	corruptionRestoreChance: 0.8,
 	extractBonusDpPerField: 2,
@@ -53,6 +52,7 @@ export type Rarity = (typeof RARITY_TIERS)[number];
 export const RARITY: {
 	weights: Record<Rarity, number>;
 	fields: Record<Rarity, readonly [min: number, max: number]>;
+	corruption: Record<Rarity, number>;
 	coherentFrom: Rarity;
 } = {
 	weights: {
@@ -70,6 +70,14 @@ export const RARITY: {
 		epic: [5, 6],
 		legendary: [6, 7],
 		mythic: [7, 7],
+	},
+	corruption: {
+		common: 0.24,
+		uncommon: 0.16,
+		rare: 0.1,
+		epic: 0.06,
+		legendary: 0.03,
+		mythic: 0.01,
 	},
 	coherentFrom: "uncommon",
 };

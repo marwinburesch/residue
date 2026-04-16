@@ -104,7 +104,7 @@ export function spawnContainer(
 		if (!fieldDef.allowMultiple) usedKinds.add(fieldDef.kind);
 		const value = fieldValue(rng, fieldDef, person);
 		if (value === null) continue;
-		const corrupted = rng() < REVEAL.corruptionChance;
+		const corrupted = rng() < RARITY.corruption[rarity];
 		if (corrupted) fireMilestone(state, "firstCorruptedField");
 		fragments.push({
 			id: nextId(state),
