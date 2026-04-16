@@ -1,3 +1,4 @@
+import { Blocks, Toolbox, Upload } from "lucide-static";
 import {
 	UPGRADE_IDS,
 	upgrades as defs,
@@ -13,6 +14,12 @@ import {
 	upgradeLevel,
 } from "../engine/upgrades.ts";
 import { createButton, type ButtonHandle } from "./button.ts";
+
+const ICONS: Partial<Record<UpgradeId, string>> = {
+	processAuto: Blocks,
+	autoExtract: Upload,
+	autoRestore: Toolbox,
+};
 
 type RowView = {
 	row: HTMLElement;
@@ -77,12 +84,22 @@ function createRow(
 
 	const header = document.createElement("div");
 	header.className = "upgrade-header";
+	const title = document.createElement("span");
+	title.className = "upgrade-title";
+	const icon = ICONS[id];
+	if (icon) {
+		const iconEl = document.createElement("span");
+		iconEl.className = "icon upgrade-icon";
+		iconEl.innerHTML = icon;
+		title.appendChild(iconEl);
+	}
 	const name = document.createElement("span");
 	name.className = "upgrade-name";
 	name.textContent = def.name;
+	title.appendChild(name);
 	const levelEl = document.createElement("span");
 	levelEl.className = "upgrade-level";
-	header.append(name, levelEl);
+	header.append(title, levelEl);
 
 	const desc = document.createElement("p");
 	desc.className = "upgrade-desc";

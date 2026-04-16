@@ -210,6 +210,11 @@ main > section.is-active {
 	align-items: baseline;
 	gap: 8px;
 }
+.upgrade-title {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
 .upgrade-name {
 	font-weight: 600;
 	font-size: 12px;
