@@ -1,0 +1,203 @@
+.panel-records #fragments {
+	display: grid;
+	grid-template-columns: 1fr;
+	grid-auto-rows: auto;
+	gap: 14px;
+}
+
+.records-toolbar {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+	min-height: 2rem;
+}
+.records-toolbar:empty {
+	display: none;
+}
+
+.throughput-readout {
+	font-size: 0.85rem;
+	color: var(--ink-dim, #888);
+	font-variant-numeric: tabular-nums;
+	margin-left: auto;
+}
+.throughput-readout--warn {
+	color: var(--warn, #c44);
+}
+
+.container-slot--empty {
+	border: 1px dashed var(--line);
+	opacity: 0.45;
+}
+
+.container-card {
+	position: relative;
+	background: var(--card);
+	border: 1px solid var(--line);
+	padding: 12px 14px;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+.container-card .container-body {
+	flex: 1;
+	overflow: hidden;
+	min-height: 0;
+}
+.container-card.is-ready .btn--dim {
+	border-color: var(--ink);
+	color: var(--ink);
+}
+.container-card h3 {
+	margin: 0 0 10px;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--muted);
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+.container-card > .btn--block {
+	margin-top: 12px;
+}
+
+.rarity-badge {
+	position: absolute;
+	top: 8px;
+	right: 10px;
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+	font-size: 10px;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--muted);
+}
+.rarity-dot {
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: currentColor;
+}
+.rarity-uncommon .rarity-badge {
+	color: var(--rarity-uncommon);
+}
+.rarity-rare .rarity-badge {
+	color: var(--rarity-rare);
+}
+.rarity-epic .rarity-badge {
+	color: var(--rarity-epic);
+}
+.rarity-legendary .rarity-badge {
+	color: var(--rarity-legendary);
+}
+.rarity-mythic .rarity-badge {
+	color: var(--rarity-mythic);
+}
+
+.fragment-row {
+	display: grid;
+	grid-template-columns: 6rem minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 10px;
+	padding: 6px 0;
+	border-top: 1px solid var(--line);
+}
+.fragment-row:first-of-type {
+	border-top: none;
+}
+
+.fragment-row--lost {
+	animation: fragment-lost 520ms steps(8, end) forwards;
+	pointer-events: none;
+}
+@keyframes fragment-lost {
+	0% {
+		opacity: 1;
+		transform: translateX(0);
+		filter: none;
+	}
+	15% {
+		opacity: 0.4;
+		transform: translateX(-2px);
+		filter: invert(1);
+	}
+	30% {
+		opacity: 0.9;
+		transform: translateX(3px);
+		filter: none;
+	}
+	45% {
+		opacity: 0.2;
+		transform: translateX(-4px);
+		filter: invert(1) hue-rotate(90deg);
+	}
+	60% {
+		opacity: 0.7;
+		transform: translateX(2px);
+		filter: none;
+	}
+	75% {
+		opacity: 0.15;
+		transform: translateX(-1px);
+		filter: invert(1);
+	}
+	100% {
+		opacity: 0;
+		transform: translateX(0);
+		filter: none;
+	}
+}
+
+.fragment-label {
+	font-size: 11px;
+	color: var(--muted);
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+.fragment-value {
+	font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+	font-size: 13px;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+	.panel-records {
+		padding: 12px;
+	}
+	.container-card {
+		padding: 10px 12px;
+	}
+	.fragment-row {
+		grid-template-columns: minmax(0, 1fr) auto;
+		grid-template-areas:
+			"label action"
+			"value value";
+		align-items: center;
+		gap: 4px 10px;
+		padding: 8px 0;
+	}
+	.fragment-label {
+		grid-area: label;
+	}
+	.fragment-value {
+		grid-area: value;
+		white-space: normal;
+		overflow-wrap: anywhere;
+	}
+	.fragment-row > .btn {
+		grid-area: action;
+		justify-self: end;
+	}
+}
+
+@media (min-width: 900px) {
+	.panel-records #fragments {
+		grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+		grid-auto-rows: 22rem;
+	}
+}

@@ -1,0 +1,45 @@
+#registry {
+	background: var(--card);
+	padding: 14px 16px;
+}
+
+.profile-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.profile {
+	padding: 10px 0;
+	border-top: 1px solid var(--line);
+}
+.profile:first-child {
+	border-top: none;
+}
+.profile header {
+	display: flex;
+	justify-content: space-between;
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--muted);
+	margin-bottom: 4px;
+}
+.profile--outline .profile-tier {
+	color: var(--accent);
+}
+
+.profile dl {
+	display: grid;
+	grid-template-columns: 90px 1fr;
+	gap: 2px 10px;
+	margin: 0;
+}
+.profile dt {
+	color: var(--muted);
+	font-size: 11px;
+}
+.profile dd {
+	margin: 0;
+	font-size: 12px;
+}

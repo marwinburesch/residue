@@ -13,22 +13,47 @@ import { renderUpgradePanel } from "./upgradePanel.ts";
 import { renderAutomationChips } from "./automationsPanel.ts";
 import { renderLog } from "./log.ts";
 import { applyToneStage } from "./toneController.ts";
-import { loadTheme, toggleTheme } from "./themeController.ts";
+import { mountTabs } from "./tabs.ts";
+import { mountOverflowMenu } from "./overflowMenu.ts";
 
 const AUTOSAVE_MS = 5_000;
 
 export function mountApp(_root: HTMLElement): void {
-	const resources = requireEl("resources");
+	const resourceBar = requireEl("resource-bar");
 	const fragments = requireEl("fragments");
 	const recordsToolbar = requireEl("records-toolbar");
 	const registry = requireEl("registry");
 	const upgradesEl = requireEl("upgrades");
-	const log = requireEl("log");
+	const logPanel = requireEl("log-panel");
 	const channelsEl = requireEl("channels");
-	const tabsEl = requireEl("tabs");
-	mountTabs(tabsEl);
+	const panelNav = requireEl("panel-nav");
+	const scrim = requireEl("drawer-scrim");
+	const overflowBtn = requireEl("overflow-btn");
+	const overflowMenu = requireEl("overflow-menu");
+	const topbar = requireEl("topbar");
+
+	const setTopbarH = () => {
+		document.documentElement.style.setProperty(
+			"--topbar-h",
+			`${topbar.offsetHeight}px`,
+		);
+	};
+	setTopbarH();
+	new ResizeObserver(setTopbarH).observe(topbar);
+
+	mountTabs(panelNav, scrim);
 
 	const { state, offline } = loadOrInit(Date.now());
+	let wiped = false;
+
+	mountOverflowMenu(overflowBtn, overflowMenu, {
+		onReset: () => {
+			wiped = true;
+			wipe();
+			location.reload();
+		},
+	});
+
 	let lastCorkboard: boolean | null = null;
 	const renderChannels = () => {
 		const corkboard = !!state.channels.corkboard;
@@ -44,8 +69,7 @@ export function mountApp(_root: HTMLElement): void {
 		}
 		channelsEl.innerHTML = `<h2>Channels</h2><ul class="channel-list">${items.join("")}</ul>`;
 	};
-	let wiped = false;
-	mountThemeToggle(resources.parentElement ?? resources);
+
 	const extractAllBtn = mountExtractAllButton(recordsToolbar, () => {
 		if (extractAllReady(state) > 0) render();
 	});
@@ -56,11 +80,7 @@ export function mountApp(_root: HTMLElement): void {
 	throughputEl.className = "throughput-readout";
 	throughputEl.hidden = true;
 	recordsToolbar.appendChild(throughputEl);
-	mountResetButton(resources.parentElement ?? resources, () => {
-		wiped = true;
-		wipe();
-		location.reload();
-	});
+
 	if (offline) {
 		logInfo(
 			state,
@@ -73,7 +93,7 @@ export function mountApp(_root: HTMLElement): void {
 	const render = () => {
 		applyToneStage(state.stage);
 		renderChannels();
-		renderResourceBar(resources, state);
+		renderResourceBar(resourceBar, state);
 		const hasUpgrade = upgradeLevel(state, "extractAll") > 0;
 		const anyReady = state.containers.some(isContainerReady);
 		extractAllBtn.update({
@@ -93,7 +113,7 @@ export function mountApp(_root: HTMLElement): void {
 		renderAutomationChips(automationChipsEl, state);
 		renderUpgradePanel(upgradesEl, state, render);
 		renderProfileRegistry(registry, state);
-		renderLog(log, state);
+		renderLog(logPanel, state);
 	};
 
 	let lastTick = performance.now();
@@ -127,53 +147,6 @@ export function mountApp(_root: HTMLElement): void {
 	render();
 }
 
-const TABS: ReadonlyArray<{ id: string; label: string }> = [
-	{ id: "records", label: "Records" },
-	{ id: "ops", label: "Channels & Upgrades" },
-	{ id: "registry", label: "Registry" },
-];
-
-function mountTabs(host: HTMLElement): void {
-	const panels = document.querySelectorAll<HTMLElement>(
-		"main > section[data-panel]",
-	);
-	const buttons: HTMLButtonElement[] = [];
-	const activate = (id: string) => {
-		for (const btn of buttons)
-			btn.classList.toggle("is-active", btn.dataset.tab === id);
-		for (const panel of panels)
-			panel.classList.toggle("is-active", panel.dataset.panel === id);
-	};
-	for (const { id, label } of TABS) {
-		const btn = document.createElement("button");
-		btn.type = "button";
-		btn.className = "tab";
-		btn.dataset.tab = id;
-		btn.textContent = label;
-		btn.addEventListener("click", () => activate(id));
-		host.appendChild(btn);
-		buttons.push(btn);
-	}
-	activate(TABS[0]!.id);
-}
-
-function mountThemeToggle(host: HTMLElement): void {
-	const btn = createButton({
-		variant: "inline",
-		label: labelFor(loadTheme()),
-		onClick: () => {
-			const next = toggleTheme();
-			btn.update({ label: labelFor(next) });
-		},
-	});
-	btn.el.classList.add("btn--theme");
-	host.appendChild(btn.el);
-}
-
-function labelFor(theme: "light" | "dark"): string {
-	return theme === "light" ? "Dark" : "Light";
-}
-
 function mountExtractAllButton(
 	host: HTMLElement,
 	onClick: () => void,
@@ -186,19 +159,6 @@ function mountExtractAllButton(
 	btn.update({ hidden: true });
 	host.appendChild(btn.el);
 	return btn;
-}
-
-function mountResetButton(host: HTMLElement, onConfirm: () => void): void {
-	const btn = createButton({
-		variant: "inline",
-		label: "Reset",
-		onClick: () => {
-			if (!confirm("Wipe save and restart? This cannot be undone.")) return;
-			onConfirm();
-		},
-	});
-	btn.el.classList.add("btn--reset");
-	host.appendChild(btn.el);
 }
 
 function requireEl(id: string): HTMLElement {

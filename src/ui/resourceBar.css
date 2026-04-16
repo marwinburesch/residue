@@ -1,0 +1,33 @@
+#resource-bar {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 20px 24px;
+	padding: 10px 16px;
+	border-bottom: 1px solid var(--line);
+	background: var(--bg);
+	font-variant-numeric: tabular-nums;
+}
+
+.res {
+	display: flex;
+	flex-direction: row;
+	align-items: baseline;
+	gap: 6px;
+	min-width: 0;
+}
+
+.res-label {
+	font-size: 10px;
+	color: var(--muted);
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+}
+
+.res-value {
+	font-variant-numeric: tabular-nums;
+	font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+	font-size: 13px;
+}
+.res-warn {
+	color: var(--warn);
+}

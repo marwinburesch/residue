@@ -12,7 +12,7 @@ export function renderLog(root: HTMLElement, state: GameState): void {
 	const view = views.get(root) ?? initView(root);
 	if (tail === view.lastTail) return;
 	view.lastTail = tail;
-	const recent = state.log.slice(-30).reverse();
+	const recent = state.log.slice(-30);
 	view.list.replaceChildren();
 	for (const entry of recent) {
 		const li = document.createElement("li");
@@ -20,10 +20,11 @@ export function renderLog(root: HTMLElement, state: GameState): void {
 		li.textContent = entry.text;
 		view.list.appendChild(li);
 	}
+	root.scrollTop = root.scrollHeight;
 }
 
 function initView(root: HTMLElement): View {
-	root.innerHTML = `<h2>Log</h2>`;
+	root.replaceChildren();
 	const list = document.createElement("ol");
 	list.className = "log-list";
 	root.appendChild(list);

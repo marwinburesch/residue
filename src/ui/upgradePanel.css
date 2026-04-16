@@ -1,0 +1,77 @@
+#channels,
+#upgrades {
+	background: var(--card);
+	padding: 14px 16px;
+	border-bottom: 1px solid var(--line);
+}
+#upgrades:last-child {
+	border-bottom: none;
+}
+
+.channel-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+.channel {
+	display: flex;
+	justify-content: space-between;
+	padding: 6px 0;
+	border-bottom: 1px dashed var(--line);
+}
+.channel:last-child {
+	border-bottom: none;
+}
+.channel-meta {
+	color: var(--muted);
+	font-size: 11px;
+}
+
+.upgrade-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+.upgrade-row {
+	padding: 10px 0;
+	border-top: 1px dashed var(--line);
+}
+.upgrade-row:first-child {
+	border-top: none;
+	padding-top: 2px;
+}
+.upgrade-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 8px;
+}
+.upgrade-title {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+.upgrade-name {
+	font-weight: 600;
+	font-size: 12px;
+}
+.upgrade-level {
+	font-size: 10px;
+	color: var(--muted);
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+.upgrade-desc {
+	margin: 2px 0 4px;
+	font-size: 11px;
+	color: var(--muted);
+}
+.upgrade-effect {
+	margin: 0 0 6px;
+	font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+	font-size: 11px;
+}
+.upgrade-row.is-max .upgrade-effect {
+	color: var(--muted);
+}
+
