@@ -28,7 +28,7 @@ describe("purchase", () => {
 		expect(purchaseUpgrade(s, "computeRegen")).toBe(true);
 		expect(s.dp).toBe(100 - cost);
 		expect(upgradeLevel(s, "computeRegen")).toBe(1);
-		expect(s.log.at(-1)?.text).toContain("Compute throughput");
+		expect(s.log.at(-1)?.kind).toBe("signal");
 	});
 
 	test("fails and does not mutate when DP insufficient", () => {

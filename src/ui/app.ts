@@ -4,6 +4,7 @@ import {
 	extractAllReady,
 	isContainerReady,
 } from "../engine/containerLifecycle.ts";
+import { fireMilestone } from "../engine/milestones.ts";
 import { upgradeLevel } from "../engine/upgrades.ts";
 import { suspicionThrottle } from "../engine/suspicion.ts";
 import { loadOrInit, wipe } from "./storage.ts";
@@ -90,6 +91,7 @@ export function mountApp(_root: HTMLElement): void {
 		);
 	} else if (state.log.length === 0) {
 		logInfo(state, "[INFO] Session initialised. OCR pipeline online.");
+		fireMilestone(state, "sessionStartGuide");
 	}
 
 	const render = () => {

@@ -42,6 +42,9 @@
 .log-entry--warn {
 	color: var(--warn);
 }
+.log-entry--signal {
+	color: var(--rarity-uncommon);
+}
 
 body[data-tone-stage="1"] #log-panel {
 	font-size: 12.5px;

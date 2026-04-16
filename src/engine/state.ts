@@ -7,7 +7,7 @@ import type { StageId } from "../data/stageConfig.ts";
 
 export type LogEntry = {
 	at: number;
-	kind: "info" | "warn";
+	kind: "info" | "warn" | "signal";
 	text: string;
 };
 
@@ -120,6 +120,10 @@ export function logInfo(state: GameState, text: string): void {
 
 export function logWarn(state: GameState, text: string): void {
 	appendLog(state, "warn", text);
+}
+
+export function logSignal(state: GameState, text: string): void {
+	appendLog(state, "signal", text);
 }
 
 function appendLog(

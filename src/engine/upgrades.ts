@@ -1,3 +1,4 @@
+import { UPGRADE_FLAVOR } from "../data/narrative.ts";
 import {
 	AUTO_EXTRACT_COOLDOWNS_MS,
 	AUTO_RESTORE_COOLDOWNS_MS,
@@ -9,7 +10,7 @@ import {
 	upgrades as defs,
 	type UpgradeId,
 } from "../data/upgradeTree.ts";
-import { logInfo, type GameState } from "./state.ts";
+import { logInfo, logSignal, type GameState } from "./state.ts";
 
 export function upgradeLevel(state: GameState, id: UpgradeId): number {
 	return state.upgrades[id] ?? 0;
@@ -44,7 +45,9 @@ export function purchaseUpgrade(state: GameState, id: UpgradeId): boolean {
 	state.dp -= cost;
 	const next = upgradeLevel(state, id) + 1;
 	state.upgrades[id] = next;
-	logInfo(state, `[INFO] ${defs[id].name} calibrated. Level ${next}.`);
+	const flavor = UPGRADE_FLAVOR[id]?.[next - 1];
+	if (flavor) logSignal(state, flavor);
+	else logInfo(state, `[INFO] ${defs[id].name} calibrated. Level ${next}.`);
 	return true;
 }
 
