@@ -129,14 +129,32 @@ export function spawnContainer(
 	return container;
 }
 
+export function isFragmentProcessable(fragment: Fragment): boolean {
+	if (fragment.resolved || fragment.corrupted) return false;
+	if (fragment.processing) return false;
+	return fragment.stage < 3;
+}
+
+export function fragmentProcessCost(
+	state: GameState,
+	fragment: Fragment,
+): number | null {
+	if (!isFragmentProcessable(fragment)) return null;
+	return totalProcessCost(state, fragment.stage as 0 | 1 | 2);
+}
+
+export function fragmentRestoreCost(): number {
+	return REVEAL.corruptionRestoreCost;
+}
+
 export function startProcessing(
 	state: GameState,
 	fragmentId: number,
 ): boolean {
 	const fragment = findFragment(state, fragmentId);
-	if (!fragment || fragment.resolved || fragment.corrupted) return false;
-	if (fragment.processing || fragment.stage >= 3) return false;
-	const cost = totalProcessCost(state, fragment.stage as 0 | 1 | 2);
+	if (!fragment) return false;
+	const cost = fragmentProcessCost(state, fragment);
+	if (cost === null) return false;
 	if (!spendCompute(state, cost)) return false;
 	fragment.processing = true;
 	fragment.stageTimer = 0;
@@ -152,7 +170,7 @@ export function processAllInContainer(
 	if (!container) return 0;
 	let started = 0;
 	for (const f of container.fragments) {
-		if (f.resolved || f.corrupted || f.processing || f.stage >= 3) continue;
+		if (!isFragmentProcessable(f)) continue;
 		if (!startProcessing(state, f.id)) break;
 		started++;
 	}
