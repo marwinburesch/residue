@@ -9,6 +9,7 @@ import {
 import { fireMilestone } from "./milestones.ts";
 import {
 	extractContainer,
+	isFragmentProcessable,
 	restoreCorrupted,
 	spawnContainer,
 	startProcessing,
@@ -93,7 +94,7 @@ export function tickAutoProcess(state: GameState, dtMs: number): void {
 	state.processAutoTimer = 0;
 	for (const c of state.containers) {
 		for (const f of c.fragments) {
-			if (f.resolved || f.corrupted || f.processing || f.stage >= 3) continue;
+			if (!isFragmentProcessable(f)) continue;
 			if (startProcessing(state, f.id)) return;
 			return;
 		}

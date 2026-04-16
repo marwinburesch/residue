@@ -1,10 +1,11 @@
 import type { Container, GameState } from "../engine/state.ts";
 import {
 	extractContainer,
+	fragmentProcessCost,
 	isContainerReady,
 	processAllInContainer,
 } from "../engine/containerLifecycle.ts";
-import { totalProcessCost, upgradeLevel } from "../engine/upgrades.ts";
+import { upgradeLevel } from "../engine/upgrades.ts";
 import { createButton, type ButtonHandle } from "./button.ts";
 import { costButton } from "./costButton.ts";
 import {
@@ -141,8 +142,9 @@ export function syncContainer(
 	let totalCost = 0;
 	let eligible = 0;
 	for (const f of container.fragments) {
-		if (f.resolved || f.corrupted || f.processing || f.stage >= 3) continue;
-		totalCost += totalProcessCost(state, f.stage as 0 | 1 | 2);
+		const cost = fragmentProcessCost(state, f);
+		if (cost === null) continue;
+		totalCost += cost;
 		eligible++;
 	}
 	if (eligible === 0) {

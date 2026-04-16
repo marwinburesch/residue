@@ -1,11 +1,12 @@
 import { ScanEye, Toolbox } from "lucide-static";
-import { REVEAL } from "../data/tuning.ts";
 import type { Fragment, GameState } from "../engine/state.ts";
 import {
+	fragmentProcessCost,
+	fragmentRestoreCost,
+	isFragmentProcessable,
 	restoreCorrupted,
 	startProcessing,
 } from "../engine/containerLifecycle.ts";
-import { totalProcessCost } from "../engine/upgrades.ts";
 import { createButton, type ButtonHandle } from "./button.ts";
 import { costButton } from "./costButton.ts";
 
@@ -71,11 +72,10 @@ export function syncFragment(
 	fragment: Fragment,
 	state: GameState,
 ): void {
+	const processCost = fragmentProcessCost(state, fragment);
 	const nextCost = fragment.corrupted
-		? REVEAL.corruptionRestoreCost
-		: !fragment.processing && fragment.stage < 3
-			? totalProcessCost(state, fragment.stage as 0 | 1 | 2)
-			: -1;
+		? fragmentRestoreCost()
+		: (processCost ?? -1);
 	const affordable = nextCost >= 0 && state.compute >= nextCost;
 	if (
 		fv.lastStage === fragment.stage &&
@@ -97,11 +97,11 @@ export function syncFragment(
 
 	if (fragment.corrupted) {
 		fv.actionBtn.update({
-			...costButton(REVEAL.corruptionRestoreCost, state.compute),
+			...costButton(nextCost, state.compute),
 			label: "Restore",
 			icon: Toolbox,
 		});
-	} else if (!fragment.processing && fragment.stage < 3) {
+	} else if (isFragmentProcessable(fragment)) {
 		fv.actionBtn.update({
 			...costButton(nextCost, state.compute),
 			label: "Process",
