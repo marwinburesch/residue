@@ -1,0 +1,53 @@
+.btn {
+	background: var(--bg);
+	border: 1px solid var(--ink);
+	color: var(--ink);
+	font: inherit;
+	font-size: 11px;
+	letter-spacing: 0.08em;
+	cursor: pointer;
+	transition:
+		background 120ms ease,
+		color 120ms ease,
+		border-color 120ms ease;
+}
+.btn:hover:not(:disabled) {
+	background: var(--ink);
+	color: var(--bg);
+}
+.btn:disabled {
+	cursor: default;
+}
+.btn--block {
+	width: 100%;
+	text-transform: uppercase;
+	padding: 8px 0;
+}
+.btn--block:disabled {
+	border-color: var(--line);
+	color: var(--muted);
+}
+.btn--inline {
+	padding: 4px 10px;
+}
+.btn--inline:disabled {
+	opacity: 0.5;
+}
+.btn--icon {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 3px 6px;
+	font-variant-numeric: tabular-nums;
+}
+.btn--icon .icon svg {
+	width: 14px;
+	height: 14px;
+}
+.btn--icon:disabled {
+	opacity: 0.5;
+}
+.btn--dim {
+	border-color: var(--line);
+	color: var(--muted);
+}

@@ -1,13 +1,13 @@
 import type { GameState } from "./state.ts";
 import { regenCompute } from "./resources.ts";
+import { drainExtracted } from "./containerLifecycle.ts";
 import {
-	drainExtracted,
 	tickAutoExtract,
 	tickAutoProcess,
 	tickAutoRestore,
 	tickChannels,
 	tickReveal,
-} from "./fragments.ts";
+} from "./fragmentTicks.ts";
 import { ingestBatch, tickProfileDp } from "./profiles.ts";
 import { tickSuspicion } from "./suspicion.ts";
 import { advanceStageIfReady } from "./stages.ts";

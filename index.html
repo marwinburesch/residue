@@ -8,23 +8,42 @@
   </head>
   <body>
     <header id="topbar">
-      <span class="brand">Harlow &amp; Sable</span>
-      <span class="subtitle">Expense Records / Field Extraction</span>
-      <div id="resources"></div>
+      <div class="topbar-brand">
+        <span class="brand">Harlow &amp; Sable</span>
+        <span class="subtitle">Expense Records / Field Extraction</span>
+      </div>
+      <button
+        id="overflow-btn"
+        class="overflow-btn"
+        type="button"
+        aria-label="Menu"
+        aria-expanded="false"
+      >
+        ⋯
+      </button>
     </header>
-    <nav id="tabs" role="tablist"></nav>
-    <main>
-      <section data-panel="records" class="panel-records">
+    <section id="log-panel" aria-label="System log"></section>
+    <nav id="panel-nav" role="tablist" aria-label="Panels"></nav>
+    <div id="resource-bar"></div>
+    <main id="panels">
+      <section data-panel="records" class="panel panel-records">
         <div id="records-toolbar" class="records-toolbar"></div>
         <div id="fragments"></div>
       </section>
-      <section data-panel="ops" class="panel-ops">
-        <div id="channels"></div>
-        <div id="upgrades"></div>
+      <section data-panel="ops" class="panel panel-ops">
+        <div class="panel-body">
+          <div id="channels"></div>
+          <div id="upgrades"></div>
+        </div>
       </section>
-      <section id="registry" data-panel="registry"></section>
+      <section data-panel="registry" class="panel panel-registry">
+        <div class="panel-body">
+          <div id="registry"></div>
+        </div>
+      </section>
     </main>
-    <aside id="log"></aside>
+    <div id="drawer-scrim" hidden></div>
+    <div id="overflow-menu" hidden></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
