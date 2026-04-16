@@ -1,4 +1,4 @@
-export type ButtonVariant = "block" | "inline";
+export type ButtonVariant = "block" | "inline" | "icon";
 
 export interface ButtonCost {
 	amount: number;
@@ -8,6 +8,7 @@ export interface ButtonCost {
 export interface ButtonOptions {
 	variant?: ButtonVariant;
 	label: string;
+	icon?: string;
 	cost?: ButtonCost | null;
 	dim?: boolean;
 	onClick: () => void;
@@ -15,6 +16,7 @@ export interface ButtonOptions {
 
 export interface ButtonPatch {
 	label?: string;
+	icon?: string;
 	cost?: ButtonCost | null;
 	dim?: boolean;
 	disabled?: boolean;
@@ -36,12 +38,25 @@ export function createButton(opts: ButtonOptions): ButtonHandle {
 	const state = {
 		variant,
 		label: opts.label,
+		icon: opts.icon ?? "",
 		cost: opts.cost ?? null,
 		dim: opts.dim ?? false,
 		disabled: false,
 		hidden: false,
 	};
-	el.textContent = renderText(state.variant, state.label, state.cost);
+
+	const iconEl = state.icon ? document.createElement("span") : null;
+	if (iconEl) {
+		iconEl.className = "icon";
+		iconEl.innerHTML = state.icon;
+		el.appendChild(iconEl);
+	}
+	const textEl = document.createElement("span");
+	textEl.className = "btn-text";
+	textEl.textContent = renderText(state.variant, state.label, state.cost);
+	el.appendChild(textEl);
+
+	if (state.variant === "icon") el.setAttribute("aria-label", state.label);
 	if (state.dim) el.classList.add("btn--dim");
 
 	function update(patch: ButtonPatch): void {
@@ -55,7 +70,12 @@ export function createButton(opts: ButtonOptions): ButtonHandle {
 			textDirty = true;
 		}
 		if (textDirty) {
-			el.textContent = renderText(state.variant, state.label, state.cost);
+			textEl.textContent = renderText(state.variant, state.label, state.cost);
+			if (state.variant === "icon") el.setAttribute("aria-label", state.label);
+		}
+		if (patch.icon !== undefined && patch.icon !== state.icon && iconEl) {
+			state.icon = patch.icon;
+			iconEl.innerHTML = state.icon;
 		}
 		if (patch.dim !== undefined && patch.dim !== state.dim) {
 			state.dim = patch.dim;
@@ -79,6 +99,7 @@ function renderText(
 	label: string,
 	cost: ButtonCost | null,
 ): string {
+	if (variant === "icon") return cost ? String(cost.amount) : label;
 	if (!cost) return label;
 	if (variant === "block") return `${label} · ${cost.amount} ${cost.unit}`;
 	return `${label} (${cost.amount}${cost.unit})`;

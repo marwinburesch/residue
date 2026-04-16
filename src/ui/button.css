@@ -33,6 +33,20 @@
 .btn--inline:disabled {
 	opacity: 0.5;
 }
+.btn--icon {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 3px 6px;
+	font-variant-numeric: tabular-nums;
+}
+.btn--icon .icon svg {
+	width: 14px;
+	height: 14px;
+}
+.btn--icon:disabled {
+	opacity: 0.5;
+}
 .btn--dim {
 	border-color: var(--line);
 	color: var(--muted);

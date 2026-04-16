@@ -1,4 +1,4 @@
-import { Blocks, Toolbox, Upload } from "lucide-static";
+import { ScanEye, Toolbox, Upload } from "lucide-static";
 import {
 	UPGRADE_IDS,
 	upgrades as defs,
@@ -16,7 +16,7 @@ import {
 import { createButton, type ButtonHandle } from "./button.ts";
 
 const ICONS: Partial<Record<UpgradeId, string>> = {
-	processAuto: Blocks,
+	processAuto: ScanEye,
 	autoExtract: Upload,
 	autoRestore: Toolbox,
 };

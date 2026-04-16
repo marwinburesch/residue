@@ -1,4 +1,4 @@
-import { Blocks, Toolbox, Upload } from "lucide-static";
+import { ScanEye, Toolbox, Upload } from "lucide-static";
 import type { GameState } from "../engine/state.ts";
 import {
 	automationStatuses,
@@ -7,7 +7,7 @@ import {
 } from "../engine/automations.ts";
 
 const ICONS: Record<AutomationId, string> = {
-	processAuto: Blocks,
+	processAuto: ScanEye,
 	autoExtract: Upload,
 	autoRestore: Toolbox,
 };

@@ -1,3 +1,4 @@
+import { ScanEye, Toolbox } from "lucide-static";
 import { CHANNEL, REVEAL } from "../data/tuning.ts";
 import type { Container, Fragment, GameState } from "../engine/state.ts";
 import {
@@ -283,8 +284,9 @@ function createFragmentView(
 	valueEl.className = "fragment-value";
 
 	const actionBtn = createButton({
-		variant: "inline",
+		variant: "icon",
 		label: "Process",
+		icon: ScanEye,
 		onClick: () => {
 			if (fragment.corrupted) {
 				if (restoreCorrupted(state, fragment.id)) onMutate();
@@ -343,6 +345,7 @@ function syncFragment(
 			disabled: !affordable,
 			dim: !affordable,
 			label: "Restore",
+			icon: Toolbox,
 			cost: { amount: REVEAL.corruptionRestoreCost, unit: "c" },
 		});
 	} else if (!fragment.processing && fragment.stage < 3) {
@@ -351,6 +354,7 @@ function syncFragment(
 			disabled: !affordable,
 			dim: !affordable,
 			label: "Process",
+			icon: ScanEye,
 			cost: { amount: nextCost, unit: "c" },
 		});
 	} else {

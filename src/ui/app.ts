@@ -1,3 +1,4 @@
+import { ScanEye, Toolbox } from "lucide-static";
 import { TICK_MS } from "../data/tuning.ts";
 import { step } from "../engine/tick.ts";
 import { logInfo } from "../engine/state.ts";
@@ -73,6 +74,7 @@ export function mountApp(_root: HTMLElement): void {
 	const extractAllBtn = mountExtractAllButton(recordsToolbar, () => {
 		if (extractAllReady(state) > 0) render();
 	});
+	mountRecordsLegend(recordsToolbar);
 	const automationChipsEl = document.createElement("span");
 	automationChipsEl.className = "auto-chips";
 	recordsToolbar.appendChild(automationChipsEl);
@@ -159,6 +161,16 @@ function mountExtractAllButton(
 	btn.update({ hidden: true });
 	host.appendChild(btn.el);
 	return btn;
+}
+
+function mountRecordsLegend(host: HTMLElement): void {
+	const legend = document.createElement("span");
+	legend.className = "records-legend";
+	legend.innerHTML = `
+		<span class="records-legend__item"><span class="icon">${ScanEye}</span>Process</span>
+		<span class="records-legend__item"><span class="icon">${Toolbox}</span>Restore</span>
+	`;
+	host.appendChild(legend);
 }
 
 function requireEl(id: string): HTMLElement {
