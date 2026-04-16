@@ -19,7 +19,7 @@ export type ContainerView = {
 	extractBtn: ButtonHandle;
 	processAllBtn: ButtonHandle;
 	fragments: Map<number, FragmentView>;
-	lastReady: boolean | null;
+	lastLabel: string | null;
 };
 
 export function createContainerView(
@@ -68,7 +68,7 @@ export function createContainerView(
 		extractBtn,
 		processAllBtn,
 		fragments: new Map(),
-		lastReady: null,
+		lastLabel: null,
 	};
 }
 
@@ -120,14 +120,18 @@ export function syncContainer(
 		}
 	}
 	const ready = isContainerReady(container);
-	if (ready !== cv.lastReady) {
+	const anyProcessing = container.fragments.some(
+		(f) => !f.resolved && !f.corrupted && f.processing,
+	);
+	const label = ready ? "Extract" : anyProcessing ? "Processing…" : "IDLE";
+	if (label !== cv.lastLabel) {
 		cv.extractBtn.update({
-			label: ready ? "Extract" : "Processing…",
+			label,
 			disabled: !ready,
 			dim: !ready,
 		});
 		cv.card.classList.toggle("is-ready", ready);
-		cv.lastReady = ready;
+		cv.lastLabel = label;
 	}
 
 	if (upgradeLevel(state, "processAuto") < 1) {
