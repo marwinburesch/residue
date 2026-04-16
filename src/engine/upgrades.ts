@@ -1,11 +1,10 @@
 import {
-	AUTO_EXTRACT_COOLDOWNS_MS,
-	AUTO_RESTORE_COOLDOWNS_MS,
-	COMPUTE_MAX_BASE,
-	MACHINE_TIER_COMPUTE_MAX,
-	PROCESS_AUTO_COOLDOWNS_MS,
-	REGEN_VALUES,
-	REVEAL_STAGE_COSTS,
+	autoExtractCooldownFor,
+	autoRestoreCooldownFor,
+	computeRegenFor,
+	machineTierComputeMax,
+	processAutoCooldownFor,
+	revealStageCostsFor,
 	upgrades as defs,
 	type UpgradeId,
 } from "../data/upgradeTree.ts";
@@ -49,29 +48,23 @@ export function purchaseUpgrade(state: GameState, id: UpgradeId): boolean {
 }
 
 export function computeRegenPerSecond(state: GameState): number {
-	return REGEN_VALUES[upgradeLevel(state, "computeRegen")]!;
+	return computeRegenFor(upgradeLevel(state, "computeRegen"));
 }
 
 export function autoExtractCooldownMs(state: GameState): number | null {
-	const lvl = upgradeLevel(state, "autoExtract");
-	if (lvl === 0) return null;
-	return AUTO_EXTRACT_COOLDOWNS_MS[lvl - 1] ?? null;
+	return autoExtractCooldownFor(upgradeLevel(state, "autoExtract"));
 }
 
 export function autoRestoreCooldownMs(state: GameState): number | null {
-	const lvl = upgradeLevel(state, "autoRestore");
-	if (lvl === 0) return null;
-	return AUTO_RESTORE_COOLDOWNS_MS[lvl - 1] ?? null;
+	return autoRestoreCooldownFor(upgradeLevel(state, "autoRestore"));
 }
 
 export function autoProcessCooldownMs(state: GameState): number | null {
-	const lvl = upgradeLevel(state, "processAuto");
-	if (lvl <= 1) return null;
-	return PROCESS_AUTO_COOLDOWNS_MS[lvl - 2] ?? null;
+	return processAutoCooldownFor(upgradeLevel(state, "processAuto"));
 }
 
 export function revealStageCost(state: GameState, stage: 0 | 1 | 2): number {
-	return REVEAL_STAGE_COSTS[upgradeLevel(state, "revealCost")]![stage]!;
+	return revealStageCostsFor(upgradeLevel(state, "revealCost"))[stage];
 }
 
 export function totalProcessCost(
@@ -86,7 +79,5 @@ export function totalProcessCost(
 }
 
 export function computeMax(state: GameState): number {
-	const lvl = upgradeLevel(state, "machineTier");
-	if (lvl === 0) return COMPUTE_MAX_BASE;
-	return MACHINE_TIER_COMPUTE_MAX[lvl - 1]!;
+	return machineTierComputeMax(upgradeLevel(state, "machineTier"));
 }
