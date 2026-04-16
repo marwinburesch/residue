@@ -1,11 +1,12 @@
 import { ScanEye, Toolbox } from "lucide-static";
-import { TICK_MS } from "../data/tuning.ts";
-import { step } from "../engine/tick.ts";
 import { logInfo } from "../engine/state.ts";
-import { extractAllReady, isContainerReady } from "../engine/fragments.ts";
+import {
+	extractAllReady,
+	isContainerReady,
+} from "../engine/containerLifecycle.ts";
 import { upgradeLevel } from "../engine/upgrades.ts";
 import { suspicionThrottle } from "../engine/suspicion.ts";
-import { loadOrInit, save, wipe } from "./storage.ts";
+import { loadOrInit, wipe } from "./storage.ts";
 import { createButton, type ButtonHandle } from "./button.ts";
 import { renderResourceBar } from "./resourceBar.ts";
 import { renderFragmentBrowser } from "./fragmentBrowser.ts";
@@ -16,8 +17,7 @@ import { renderLog } from "./log.ts";
 import { applyToneStage } from "./toneController.ts";
 import { mountTabs } from "./tabs.ts";
 import { mountOverflowMenu } from "./overflowMenu.ts";
-
-const AUTOSAVE_MS = 5_000;
+import { startGameLoop } from "./gameLoop.ts";
 
 export function mountApp(_root: HTMLElement): void {
 	const resourceBar = requireEl("resource-bar");
@@ -45,11 +45,11 @@ export function mountApp(_root: HTMLElement): void {
 	mountTabs(panelNav, scrim);
 
 	const { state, offline } = loadOrInit(Date.now());
-	let wiped = false;
+	const loop = startGameLoop(state);
 
 	mountOverflowMenu(overflowBtn, overflowMenu, {
 		onReset: () => {
-			wiped = true;
+			loop.markWiped();
 			wipe();
 			location.reload();
 		},
@@ -118,33 +118,11 @@ export function mountApp(_root: HTMLElement): void {
 		renderLog(logPanel, state);
 	};
 
-	let lastTick = performance.now();
-	let lastSave = Date.now();
-	setInterval(() => {
-		const now = performance.now();
-		const dt = now - lastTick;
-		lastTick = now;
-		step(state, dt);
-		const realNow = Date.now();
-		if (!wiped && realNow - lastSave >= AUTOSAVE_MS) {
-			save(state, realNow);
-			lastSave = realNow;
-		}
-	}, TICK_MS);
-
 	const frame = () => {
 		render();
 		requestAnimationFrame(frame);
 	};
 	requestAnimationFrame(frame);
-
-	document.addEventListener("visibilitychange", () => {
-		if (!wiped && document.visibilityState === "hidden")
-			save(state, Date.now());
-	});
-	window.addEventListener("beforeunload", () => {
-		if (!wiped) save(state, Date.now());
-	});
 
 	render();
 }

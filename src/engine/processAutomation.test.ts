@@ -6,8 +6,8 @@ import {
 	isContainerReady,
 	processAllInContainer,
 	spawnContainer,
-	tickAutoProcess,
-} from "./fragments.ts";
+} from "./containerLifecycle.ts";
+import { tickAutoProcess } from "./fragmentTicks.ts";
 import { totalProcessCost } from "./upgrades.ts";
 import { PROCESS_AUTO_COOLDOWNS_MS } from "../data/upgradeTree.ts";
 
