@@ -15,6 +15,7 @@ import { renderProfileRegistry } from "./profileRegistry.ts";
 import { renderUpgradePanel } from "./upgradePanel.ts";
 import { renderAutomationChips } from "./automationsPanel.ts";
 import { renderLog } from "./log.ts";
+import { renderAuditModal } from "./auditModal.ts";
 import { applyToneStage } from "./toneController.ts";
 import { mountTabs } from "./tabs.ts";
 import { mountOverflowMenu } from "./overflowMenu.ts";
@@ -118,6 +119,7 @@ export function mountApp(_root: HTMLElement): void {
 		renderUpgradePanel(upgradesEl, state, render);
 		renderProfileRegistry(registry, state);
 		renderLog(logPanel, state);
+		renderAuditModal(state);
 	};
 
 	const frame = () => {

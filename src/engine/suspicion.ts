@@ -1,7 +1,7 @@
 import { SUSPICION } from "../data/tuning.ts";
 import { createRng } from "./rng.ts";
 import type { GameState } from "./state.ts";
-import { logInfo, logWarn } from "./state.ts";
+import { logAudit, logWarn } from "./state.ts";
 import { suspicionDecayPerSecond } from "./upgrades.ts";
 
 export function recordAction(state: GameState): void {
@@ -78,14 +78,14 @@ function bump(state: GameState, amount: number): void {
 function fireReview(state: GameState): void {
 	state.suspicion.reviewFired = true;
 	pauseChannels(state, SUSPICION.reviewPauseMs);
-	logInfo(state, "[AUDIT] Compliance review initiated. Channel paused.");
+	logAudit(state, "[AUDIT] Compliance review initiated. Channel paused.");
 }
 
 function fireAudit(state: GameState): void {
 	state.suspicion.auditFired = true;
 	pauseChannels(state, SUSPICION.auditPauseMs);
 	const dropped = dropRandomProfile(state);
-	logInfo(
+	logAudit(
 		state,
 		dropped
 			? "[AUDIT] Random sampling flagged a record. Profile redacted."
@@ -100,7 +100,7 @@ function fireReset(state: GameState): void {
 	state.pendingExtractions.length = 0;
 	state.suspicion.level = SUSPICION.resetDropTo;
 	rearmLatches(state);
-	logInfo(state, "[AUDIT] Operational reset authorised. Channel purged.");
+	logAudit(state, "[AUDIT] Operational reset authorised. Channel purged.");
 }
 
 function pauseChannels(state: GameState, durationMs: number): void {

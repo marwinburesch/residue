@@ -1,0 +1,42 @@
+.audit-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 100;
+	display: none;
+	align-items: center;
+	justify-content: center;
+	background: rgba(0, 0, 0, 0.45);
+}
+
+.audit-modal--active {
+	display: flex;
+}
+
+.audit-modal__frame {
+	background: var(--card);
+	border: 1px solid var(--audit);
+	padding: 56px 88px;
+	font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+	font-size: 14px;
+	letter-spacing: 0.22em;
+	color: var(--audit);
+	text-transform: uppercase;
+	box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04), 0 8px 40px rgba(0, 0, 0, 0.18);
+	animation: audit-blink 1.4s ease-in-out infinite;
+}
+
+@keyframes audit-blink {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.3;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.audit-modal__frame {
+		animation: none;
+	}
+}

@@ -10,6 +10,7 @@
 	--line: #cbd5e1; /* slate-300 */
 	--accent: #0d9488; /* teal-600 */
 	--warn: #b0452b;
+	--audit: #c0392b;
 	--card: #ffffff;
 	--topbar: #f1f5f9; /* slate-100 */
 	--rarity-uncommon: #3a9a3a;
@@ -26,6 +27,7 @@
 	--line: #334155; /* slate-700 */
 	--accent: #2dd4bf; /* teal-400 */
 	--warn: #e08060;
+	--audit: #ef5350;
 	--card: #0f172a; /* slate-900 */
 	--topbar: #0f172a; /* slate-900 */
 	--rarity-uncommon: #6fcf6f;

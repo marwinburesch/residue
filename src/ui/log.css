@@ -45,6 +45,10 @@
 .log-entry--signal {
 	color: var(--rarity-uncommon);
 }
+.log-entry--audit {
+	color: var(--audit);
+	font-weight: 600;
+}
 
 body[data-tone-stage="1"] #log-panel {
 	font-size: 12.5px;
