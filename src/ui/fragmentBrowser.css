@@ -123,11 +123,7 @@
 .container-card[data-type="note"] {
 	--note-surface: #f6f1e3;
 	background:
-		radial-gradient(
-			ellipse at top,
-			rgba(0, 0, 0, 0.04),
-			transparent 60%
-		),
+		radial-gradient(ellipse at top, rgba(0, 0, 0, 0.04), transparent 60%),
 		var(--note-surface);
 	border-color: rgba(120, 100, 60, 0.25);
 	box-shadow:
@@ -181,7 +177,7 @@
 }
 
 .container-card[data-type="receipt"] {
-	--receipt-surface: #fbfaf6;
+	--receipt-surface: #f1f1f1;
 	background:
 		repeating-linear-gradient(
 			0deg,
@@ -193,13 +189,19 @@
 	box-shadow:
 		0 1px 2px rgba(0, 0, 0, 0.05),
 		inset 0 1px 0 rgba(0, 0, 0, 0.04);
-	mask-image:
-		radial-gradient(circle 3px at 4px -1px, transparent 98%, black 100%);
+	mask-image: radial-gradient(
+		circle 3px at 4px -1px,
+		transparent 98%,
+		black 100%
+	);
 	mask-repeat: repeat-x;
 	mask-size: 8px 100%;
 	mask-position: top;
-	-webkit-mask-image:
-		radial-gradient(circle 3px at 4px -1px, transparent 98%, black 100%);
+	-webkit-mask-image: radial-gradient(
+		circle 3px at 4px -1px,
+		transparent 98%,
+		black 100%
+	);
 	-webkit-mask-repeat: repeat-x;
 	-webkit-mask-size: 8px 100%;
 	-webkit-mask-position: top;
