@@ -2,6 +2,7 @@ import { UPGRADE_FLAVOR } from "../data/narrative.ts";
 import {
 	autoExtractCooldownFor,
 	autoRestoreCooldownFor,
+	complianceHygieneDecayFor,
 	computeRegenFor,
 	machineTierComputeMax,
 	processAutoCooldownFor,
@@ -83,4 +84,8 @@ export function totalProcessCost(
 
 export function computeMax(state: GameState): number {
 	return machineTierComputeMax(upgradeLevel(state, "machineTier"));
+}
+
+export function suspicionDecayPerSecond(state: GameState): number {
+	return complianceHygieneDecayFor(upgradeLevel(state, "complianceHygiene"));
 }

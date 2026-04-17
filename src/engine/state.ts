@@ -7,7 +7,7 @@ import type { StageId } from "../data/stageConfig.ts";
 
 export type LogEntry = {
 	at: number;
-	kind: "info" | "warn" | "signal";
+	kind: "info" | "warn" | "signal" | "audit";
 	text: string;
 };
 
@@ -60,6 +60,10 @@ export type SuspicionState = {
 	level: number;
 	recentActions: number[];
 	warned: boolean;
+	reviewFired: boolean;
+	auditFired: boolean;
+	resetFired: boolean;
+	channelPauseUntil: number;
 };
 
 export type GameState = {
@@ -100,7 +104,15 @@ export function createState(seed: number, now: number): GameState {
 		containers: [],
 		pendingExtractions: [],
 		profiles: [],
-		suspicion: { level: 0, recentActions: [], warned: false },
+		suspicion: {
+			level: 0,
+			recentActions: [],
+			warned: false,
+			reviewFired: false,
+			auditFired: false,
+			resetFired: false,
+			channelPauseUntil: 0,
+		},
 		upgrades: {},
 		autoExtractTimer: 0,
 		autoRestoreTimer: 0,
@@ -124,6 +136,10 @@ export function logWarn(state: GameState, text: string): void {
 
 export function logSignal(state: GameState, text: string): void {
 	appendLog(state, "signal", text);
+}
+
+export function logAudit(state: GameState, text: string): void {
+	appendLog(state, "audit", text);
 }
 
 function appendLog(

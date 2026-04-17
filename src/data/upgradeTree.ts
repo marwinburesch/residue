@@ -5,7 +5,8 @@ export type UpgradeId =
 	| "revealCost"
 	| "machineTier"
 	| "processAuto"
-	| "extractAll";
+	| "extractAll"
+	| "complianceHygiene";
 
 export type UpgradeRequirement = { upgrade: UpgradeId; level: number };
 
@@ -30,6 +31,8 @@ export const AUTO_EXTRACT_COOLDOWNS_MS = [
 export const AUTO_RESTORE_COOLDOWNS_MS = [8000, 5000, 3000] as const;
 
 export const PROCESS_AUTO_COOLDOWNS_MS = [8000, 4000, 2000] as const;
+
+export const COMPLIANCE_HYGIENE_DECAY = [0.1, 0.18, 0.3, 0.5] as const;
 
 export const MACHINE_TIER_NAMES = [
 	"CPU upgrade",
@@ -67,6 +70,13 @@ export function autoRestoreCooldownFor(level: number): number | null {
 export function processAutoCooldownFor(level: number): number | null {
 	if (level <= 1) return null;
 	return PROCESS_AUTO_COOLDOWNS_MS[level - 2] ?? null;
+}
+
+export function complianceHygieneDecayFor(level: number): number {
+	return (
+		COMPLIANCE_HYGIENE_DECAY[level] ??
+		COMPLIANCE_HYGIENE_DECAY[COMPLIANCE_HYGIENE_DECAY.length - 1]!
+	);
 }
 
 export function machineTierName(level: number): string | null {
@@ -167,6 +177,16 @@ export const upgrades: Record<UpgradeId, UpgradeDef> = {
 		costs: [200],
 		effect: (lvl) => (lvl === 0 ? "off" : "on"),
 	},
+	complianceHygiene: {
+		id: "complianceHygiene",
+		name: "Compliance hygiene",
+		description: "System load decays faster toward the floor.",
+		flavor:
+			"Schedule routine redactions. Older entries quietly stop being entries.",
+		costs: [300, 900, 2400],
+		effect: (lvl) =>
+			`${complianceHygieneDecayFor(lvl).toFixed(2)} load/s`,
+	},
 };
 
 export const UPGRADE_IDS: readonly UpgradeId[] = [
@@ -177,4 +197,5 @@ export const UPGRADE_IDS: readonly UpgradeId[] = [
 	"machineTier",
 	"processAuto",
 	"extractAll",
+	"complianceHygiene",
 ];

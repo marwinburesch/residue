@@ -12,13 +12,20 @@ export const DP = {
 
 export const SUSPICION = {
 	max: 100,
-	decayPerSecond: 0.1,
 	perRapidReveal: 3,
 	rapidWindowMs: 1500,
 	rapidThreshold: 3,
 	warningAt: 25,
 	throttleFrom: 25,
 	throttleFloor: 0.25,
+	reviewAt: 50,
+	auditAt: 75,
+	resetAt: 100,
+	reviewPauseMs: 30_000,
+	auditPauseMs: 60_000,
+	resetPauseMs: 90_000,
+	resetDropTo: 40,
+	tierHysteresis: 5,
 } as const;
 
 export const REVEAL = {

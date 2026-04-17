@@ -9,12 +9,14 @@ import {
 	maxLevel,
 	purchaseUpgrade,
 	revealStageCost,
+	suspicionDecayPerSecond,
 	upgradeCost,
 	upgradeLevel,
 } from "./upgrades.ts";
 import {
 	AUTO_EXTRACT_COOLDOWNS_MS,
 	AUTO_RESTORE_COOLDOWNS_MS,
+	COMPLIANCE_HYGIENE_DECAY,
 	REGEN_VALUES,
 	REVEAL_STAGE_COSTS,
 	upgrades as defs,
@@ -58,6 +60,7 @@ describe("selectors", () => {
 		expect(autoExtractCooldownMs(s)).toBeNull();
 		expect(autoRestoreCooldownMs(s)).toBeNull();
 		expect(revealStageCost(s, 0)).toBe(REVEAL_STAGE_COSTS[0]![0]!);
+		expect(suspicionDecayPerSecond(s)).toBe(COMPLIANCE_HYGIENE_DECAY[0]);
 	});
 
 	test("return level-N value after purchase", () => {
@@ -66,10 +69,12 @@ describe("selectors", () => {
 		s.upgrades.revealCost = 3;
 		s.upgrades.autoExtract = 3;
 		s.upgrades.autoRestore = 2;
+		s.upgrades.complianceHygiene = 2;
 		expect(computeRegenPerSecond(s)).toBe(REGEN_VALUES[2]!);
 		expect(revealStageCost(s, 0)).toBe(REVEAL_STAGE_COSTS[3]![0]!);
 		expect(autoExtractCooldownMs(s)).toBe(AUTO_EXTRACT_COOLDOWNS_MS[2]!);
 		expect(autoRestoreCooldownMs(s)).toBe(AUTO_RESTORE_COOLDOWNS_MS[1]!);
+		expect(suspicionDecayPerSecond(s)).toBe(COMPLIANCE_HYGIENE_DECAY[2]!);
 	});
 });
 
