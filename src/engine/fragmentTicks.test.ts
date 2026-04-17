@@ -28,6 +28,14 @@ describe("tickChannels", () => {
 		tickChannels(s, 60_000);
 		expect(s.containers.length).toBe(CHANNEL.receiptsContainerCap + 3);
 	});
+
+	test("does not spawn while the channel is paused", () => {
+		const s = createState(42, 0);
+		s.now = 1000;
+		s.suspicion.channelPauseUntil = 10_000;
+		tickChannels(s, 1000 / CHANNEL.receiptsSpawnPerSecond);
+		expect(s.containers.length).toBe(0);
+	});
 });
 
 describe("tickReveal", () => {

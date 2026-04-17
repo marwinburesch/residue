@@ -32,6 +32,10 @@ describe("createState", () => {
 			level: 0,
 			recentActions: [],
 			warned: false,
+			reviewFired: false,
+			auditFired: false,
+			resetFired: false,
+			channelPauseUntil: 0,
 		});
 	});
 });

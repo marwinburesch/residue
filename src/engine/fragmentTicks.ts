@@ -16,6 +16,7 @@ import {
 } from "./containerLifecycle.ts";
 
 export function tickChannels(state: GameState, dtMs: number): void {
+	if (state.now < state.suspicion.channelPauseUntil) return;
 	const cap = CHANNEL.receiptsContainerCap;
 	for (const id of Object.keys(state.channels) as ChannelId[]) {
 		const rt = state.channels[id];

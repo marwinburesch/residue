@@ -60,6 +60,10 @@ export type SuspicionState = {
 	level: number;
 	recentActions: number[];
 	warned: boolean;
+	reviewFired: boolean;
+	auditFired: boolean;
+	resetFired: boolean;
+	channelPauseUntil: number;
 };
 
 export type GameState = {
@@ -100,7 +104,15 @@ export function createState(seed: number, now: number): GameState {
 		containers: [],
 		pendingExtractions: [],
 		profiles: [],
-		suspicion: { level: 0, recentActions: [], warned: false },
+		suspicion: {
+			level: 0,
+			recentActions: [],
+			warned: false,
+			reviewFired: false,
+			auditFired: false,
+			resetFired: false,
+			channelPauseUntil: 0,
+		},
 		upgrades: {},
 		autoExtractTimer: 0,
 		autoRestoreTimer: 0,
