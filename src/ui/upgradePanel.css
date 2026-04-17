@@ -66,6 +66,13 @@
 	font-size: 11px;
 	color: var(--muted);
 }
+.upgrade-flavor {
+	margin: 0 0 6px;
+	font-size: 11px;
+	font-style: italic;
+	color: var(--rarity-uncommon);
+	opacity: 0.85;
+}
 .upgrade-effect {
 	margin: 0 0 6px;
 	font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
