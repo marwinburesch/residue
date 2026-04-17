@@ -105,6 +105,10 @@ function createRow(
 	desc.className = "upgrade-desc";
 	desc.textContent = def.description;
 
+	const flavor = document.createElement("p");
+	flavor.className = "upgrade-flavor";
+	flavor.textContent = def.flavor;
+
 	const effectEl = document.createElement("p");
 	effectEl.className = "upgrade-effect";
 
@@ -116,7 +120,7 @@ function createRow(
 		},
 	});
 
-	row.append(header, desc, effectEl, btn.el);
+	row.append(header, desc, flavor, effectEl, btn.el);
 
 	return {
 		row,
