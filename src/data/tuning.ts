@@ -12,7 +12,6 @@ export const DP = {
 
 export const SUSPICION = {
 	max: 100,
-	decayPerSecond: 0.1,
 	perRapidReveal: 3,
 	rapidWindowMs: 1500,
 	rapidThreshold: 3,

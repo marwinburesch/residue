@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { createState, type GameState } from "./state.ts";
 import { recordAction, suspicionThrottle, tickSuspicion } from "./suspicion.ts";
 import { SUSPICION } from "../data/tuning.ts";
+import { complianceHygieneDecayFor } from "../data/upgradeTree.ts";
 
 function recordBurst(s: GameState, count: number): void {
 	for (let i = 0; i < count; i++) {
@@ -33,7 +34,15 @@ describe("suspicion", () => {
 		const s = createState(1, 0);
 		s.suspicion.level = 10;
 		tickSuspicion(s, 10_000);
-		expect(s.suspicion.level).toBe(10 - SUSPICION.decayPerSecond * 10);
+		expect(s.suspicion.level).toBe(10 - complianceHygieneDecayFor(0) * 10);
+	});
+
+	test("compliance hygiene upgrade accelerates decay", () => {
+		const s = createState(1, 0);
+		s.suspicion.level = 50;
+		s.upgrades.complianceHygiene = 3;
+		tickSuspicion(s, 10_000);
+		expect(s.suspicion.level).toBe(50 - complianceHygieneDecayFor(3) * 10);
 	});
 
 	test("does not decay below zero", () => {

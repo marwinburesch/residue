@@ -2,6 +2,7 @@ import { SUSPICION } from "../data/tuning.ts";
 import { createRng } from "./rng.ts";
 import type { GameState } from "./state.ts";
 import { logInfo, logWarn } from "./state.ts";
+import { suspicionDecayPerSecond } from "./upgrades.ts";
 
 export function recordAction(state: GameState): void {
 	const cutoff = state.now - SUSPICION.rapidWindowMs;
@@ -25,7 +26,7 @@ export function tickSuspicion(state: GameState, dtMs: number): void {
 	if (state.suspicion.level > 0) {
 		state.suspicion.level = Math.max(
 			0,
-			state.suspicion.level - SUSPICION.decayPerSecond * (dtMs / 1000),
+			state.suspicion.level - suspicionDecayPerSecond(state) * (dtMs / 1000),
 		);
 	}
 	rearmLatches(state);
