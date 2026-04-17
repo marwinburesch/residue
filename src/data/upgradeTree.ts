@@ -13,6 +13,7 @@ export type UpgradeDef = {
 	id: UpgradeId;
 	name: string;
 	description: string;
+	flavor: string;
 	costs: readonly number[];
 	effect: (level: number) => string;
 	requires?: UpgradeRequirement;
@@ -92,6 +93,8 @@ export const upgrades: Record<UpgradeId, UpgradeDef> = {
 		id: "computeRegen",
 		name: "Compute throughput",
 		description: "Background Compute accrual rate.",
+		flavor:
+			"Reallocate idle cycles toward the digitisation pipeline. Nobody tracks idle cycles.",
 		costs: [40, 100, 240],
 		effect: (lvl) => `${computeRegenFor(lvl).toFixed(2)} c/s`,
 	},
@@ -99,6 +102,8 @@ export const upgrades: Record<UpgradeId, UpgradeDef> = {
 		id: "autoExtract",
 		name: "Auto-extract",
 		description: "Periodically extracts clean containers.",
+		flavor:
+			"A background thread opens containers while the operator is between tasks.",
 		costs: [60, 160, 400, 900, 2000, 4500],
 		effect: (lvl) => {
 			const ms = autoExtractCooldownFor(lvl);
@@ -109,6 +114,8 @@ export const upgrades: Record<UpgradeId, UpgradeDef> = {
 		id: "autoRestore",
 		name: "Auto-restore",
 		description: "Periodically attempts to restore a corrupted fragment.",
+		flavor:
+			"Pattern-match against prior corruption and quietly repair the incoming stream.",
 		costs: [800, 2000, 5000],
 		requires: { upgrade: "autoExtract", level: 3 },
 		effect: (lvl) => {
@@ -120,6 +127,8 @@ export const upgrades: Record<UpgradeId, UpgradeDef> = {
 		id: "revealCost",
 		name: "Processing efficiency",
 		description: "Compute to start processing (per remaining stage).",
+		flavor:
+			"Refine stage overhead until it no longer appears on the ledger.",
 		effect: (lvl) => revealStageCostsFor(lvl).join(" / "),
 		costs: [60, 150, 360],
 	},
@@ -127,6 +136,8 @@ export const upgrades: Record<UpgradeId, UpgradeDef> = {
 		id: "machineTier",
 		name: "Rig expansion",
 		description: "Physical hardware. Raises max Compute.",
+		flavor:
+			"File a requisition for additional hardware. Approvals rarely come back flagged.",
 		costs: [120, 300, 750],
 		effect: (lvl) => {
 			const name = machineTierName(lvl);
@@ -138,6 +149,8 @@ export const upgrades: Record<UpgradeId, UpgradeDef> = {
 		id: "processAuto",
 		name: "Process automation",
 		description: "Batch-process containers; higher tiers auto-process fragments.",
+		flavor:
+			"Expose a batch endpoint. Processing continues outside active sessions.",
 		costs: [150, 500, 1500, 4000],
 		effect: (lvl) => {
 			if (lvl === 0) return "off";
@@ -150,6 +163,7 @@ export const upgrades: Record<UpgradeId, UpgradeDef> = {
 		id: "extractAll",
 		name: "Bulk extraction",
 		description: "Adds a toolbar button to extract every ready container at once.",
+		flavor: "A single gesture that takes everything ready. No operator prompt.",
 		costs: [200],
 		effect: (lvl) => (lvl === 0 ? "off" : "on"),
 	},
