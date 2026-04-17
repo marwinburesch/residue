@@ -1,9 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { createState } from "./state.ts";
 import {
+	discardContainer,
 	discardFragment,
 	drainExtracted,
 	extractContainer,
+	isContainerDiscardable,
 	isContainerReady,
 	restoreCorrupted,
 	spawnContainer,
@@ -128,5 +130,49 @@ describe("corrupted fields", () => {
 		if (!f) return;
 		expect(discardFragment(s, f.id)).toBe(true);
 		expect(f.resolved).toBe(true);
+	});
+});
+
+describe("discardContainer", () => {
+	test("is not discardable while any fragment is live", () => {
+		const s = createState(42, 0);
+		const c = spawnContainer(s, "receipts");
+		expect(isContainerDiscardable(c)).toBe(false);
+		expect(discardContainer(s, c.id)).toBe(false);
+		expect(s.containers.length).toBe(1);
+	});
+
+	test("becomes discardable when every fragment is resolved or corrupted", () => {
+		const s = createState(42, 0);
+		const c = spawnContainer(s, "receipts");
+		for (const f of c.fragments) {
+			if (!f.corrupted) f.resolved = true;
+		}
+		expect(isContainerDiscardable(c)).toBe(true);
+	});
+
+	test("removes the container, costs nothing, and logs", () => {
+		const s = createState(42, 0);
+		const c = spawnContainer(s, "receipts");
+		for (const f of c.fragments) f.resolved = true;
+		const computeBefore = s.compute;
+		expect(discardContainer(s, c.id)).toBe(true);
+		expect(s.containers.length).toBe(0);
+		expect(s.compute).toBe(computeBefore);
+		expect(s.log.some((e) => e.text.includes(`Container #${c.id} discarded`)))
+			.toBe(true);
+	});
+
+	test("rejects when a fragment is still processable", () => {
+		const s = createState(42, 0);
+		const c = spawnContainer(s, "receipts");
+		const live = c.fragments.find((f) => !f.corrupted && !f.resolved);
+		if (!live) return;
+		for (const f of c.fragments) {
+			if (f !== live) f.resolved = true;
+		}
+		expect(isContainerDiscardable(c)).toBe(false);
+		expect(discardContainer(s, c.id)).toBe(false);
+		expect(s.containers.length).toBe(1);
 	});
 });

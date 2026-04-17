@@ -1,7 +1,9 @@
 import type { Container, GameState } from "../engine/state.ts";
 import {
+	discardContainer,
 	extractContainer,
 	fragmentProcessCost,
+	isContainerDiscardable,
 	isContainerReady,
 	processAllInContainer,
 } from "../engine/containerLifecycle.ts";
@@ -50,7 +52,11 @@ export function createContainerView(
 		label: "Extract",
 		dim: true,
 		onClick: () => {
-			if (extractContainer(state, container.id)) onMutate();
+			if (isContainerReady(container)) {
+				if (extractContainer(state, container.id)) onMutate();
+			} else if (isContainerDiscardable(container)) {
+				if (discardContainer(state, container.id)) onMutate();
+			}
 		},
 	});
 	const processAllBtn = createButton({
@@ -124,12 +130,21 @@ export function syncContainer(
 	const anyProcessing = container.fragments.some(
 		(f) => !f.resolved && !f.corrupted && f.processing,
 	);
-	const label = ready ? "Extract" : anyProcessing ? "Processing…" : "IDLE";
+	const discardable =
+		!ready && !anyProcessing && isContainerDiscardable(container);
+	const label = ready
+		? "Extract"
+		: anyProcessing
+			? "Processing…"
+			: discardable
+				? "Discard"
+				: "IDLE";
 	if (label !== cv.lastLabel) {
+		const actionable = ready || discardable;
 		cv.extractBtn.update({
 			label,
-			disabled: !ready,
-			dim: !ready,
+			disabled: !actionable,
+			dim: !actionable,
 		});
 		cv.card.classList.toggle("is-ready", ready);
 		cv.lastLabel = label;

@@ -252,6 +252,24 @@ export function discardFragment(state: GameState, fragmentId: number): boolean {
 	return true;
 }
 
+export function isContainerDiscardable(container: Container): boolean {
+	if (container.fragments.length === 0) return true;
+	return container.fragments.every((f) => f.resolved || f.corrupted);
+}
+
+export function discardContainer(
+	state: GameState,
+	containerId: number,
+): boolean {
+	const idx = state.containers.findIndex((c) => c.id === containerId);
+	if (idx === -1) return false;
+	const container = state.containers[idx]!;
+	if (!isContainerDiscardable(container)) return false;
+	state.containers.splice(idx, 1);
+	logInfo(state, `[INFO] Container #${container.id} discarded.`);
+	return true;
+}
+
 export function drainExtracted(state: GameState): ExtractedField[][] {
 	if (state.pendingExtractions.length === 0) return [];
 	const batches = state.pendingExtractions;
