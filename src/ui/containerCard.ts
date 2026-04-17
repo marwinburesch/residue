@@ -32,6 +32,12 @@ export function createContainerView(
 ): ContainerView {
 	const card = document.createElement("article");
 	card.className = `container-card rarity-${container.rarity ?? "common"}`;
+	card.dataset.type = container.channel === "corkboard" ? "note" : "receipt";
+	if (card.dataset.type === "note") {
+		const pin = document.createElement("span");
+		pin.className = "pushpin";
+		card.appendChild(pin);
+	}
 	const title = document.createElement("h3");
 	title.textContent = `${sourceLabel(container.channel)} #${container.id}`;
 	if (container.rarity && container.rarity !== "common") {

@@ -14,3 +14,10 @@ for await (const file of glob.scan(".")) {
 	const name = file.split("/").pop()!;
 	await Bun.write(`dist/${name}`, Bun.file(file));
 }
+
+await mkdir("dist/fonts", { recursive: true });
+const fonts = new Glob("src/ui/fonts/*");
+for await (const file of fonts.scan(".")) {
+	const name = file.split("/").pop()!;
+	await Bun.write(`dist/fonts/${name}`, Bun.file(file));
+}
