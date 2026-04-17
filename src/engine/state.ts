@@ -87,6 +87,7 @@ export type GameState = {
 	processAutoTimer: number;
 	milestonesFired: MilestoneKey[];
 	stage: StageId;
+	pendingStageTransition: StageId | null;
 };
 
 export function createState(seed: number, now: number): GameState {
@@ -119,6 +120,7 @@ export function createState(seed: number, now: number): GameState {
 		processAutoTimer: 0,
 		milestonesFired: [],
 		stage: 0,
+		pendingStageTransition: null,
 	};
 }
 
