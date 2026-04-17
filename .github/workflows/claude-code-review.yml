@@ -1,0 +1,46 @@
+name: Claude Code Review
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  claude-review:
+    if: >
+      github.event.issue.pull_request != null &&
+      contains(github.event.comment.body, '@claude')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            Review this PR against the rules in CLAUDE.md and residue-game-design.md.
+
+            Focus on:
+            - Architectural boundaries: data → engine → ui must stay one-way.
+              engine/ must not import from ui/ or touch DOM, window, document.
+              data/ must not import from engine/ or ui/.
+            - Magic numbers: tuning values belong in src/data/tuning.ts, not inline.
+            - File size and single-concept rule: flag files over ~200 lines of logic
+              or with 3+ unrelated exports.
+            - Engine purity: side effects (save, audio, DOM) only in ui/ or the tick
+              scheduler — never mid-reducer.
+            - Tests: every engine module should have a sibling *.test.ts that tests
+              rules, not implementation.
+            - Comments: flag comments that explain WHAT instead of WHY, or reference
+              the current task/PR (those belong in the PR description).
+            - CSS colocation: per-component CSS next to its TS module; no monolithic
+              stylesheet.
+
+            Be concise. Point to specific file:line locations. Don't restate what
+            the diff already shows.
