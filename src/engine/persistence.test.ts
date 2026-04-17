@@ -36,6 +36,21 @@ describe("serialize/deserialize", () => {
 		expect(deserialize("{}")).toBeNull();
 		expect(deserialize("not json")).toBeNull();
 	});
+
+	test("round-trips pendingStageTransition", () => {
+		const s = createState(1, 0);
+		s.pendingStageTransition = 1;
+		const parsed = deserialize(serialize(s, 100))!;
+		expect(parsed.pendingStageTransition).toBe(1);
+	});
+
+	test("older saves without pendingStageTransition default to null", () => {
+		const s = createState(1, 0);
+		const raw = JSON.parse(serialize(s, 100));
+		delete raw.pendingStageTransition;
+		const parsed = deserialize(JSON.stringify(raw))!;
+		expect(parsed.pendingStageTransition).toBeNull();
+	});
 });
 
 describe("offline reconciliation", () => {
