@@ -15,4 +15,13 @@ describe("tick", () => {
 		step(s, -10);
 		expect(s.now).toBe(1000);
 	});
+
+	test("freezes when a stage transition is pending", () => {
+		const s = createState(1, 1000);
+		s.pendingStageTransition = 1;
+		const computeBefore = s.compute;
+		step(s, 500);
+		expect(s.now).toBe(1000);
+		expect(s.compute).toBe(computeBefore);
+	});
 });

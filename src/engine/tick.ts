@@ -14,6 +14,7 @@ import { advanceStageIfReady } from "./stages.ts";
 
 export function step(state: GameState, dtMs: number): void {
 	if (dtMs <= 0) return;
+	if (state.pendingStageTransition !== null) return;
 	state.now += dtMs;
 	regenCompute(state, dtMs);
 	tickChannels(state, dtMs);
