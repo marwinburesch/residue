@@ -137,8 +137,7 @@ export const upgrades: Record<UpgradeId, UpgradeDef> = {
 		id: "revealCost",
 		name: "Processing efficiency",
 		description: "Compute to start processing (per remaining stage).",
-		flavor:
-			"Refine stage overhead until it no longer appears on the ledger.",
+		flavor: "Refine stage overhead until it no longer appears on the ledger.",
 		effect: (lvl) => revealStageCostsFor(lvl).join(" / "),
 		costs: [60, 150, 360],
 	},
@@ -158,7 +157,8 @@ export const upgrades: Record<UpgradeId, UpgradeDef> = {
 	processAuto: {
 		id: "processAuto",
 		name: "Process automation",
-		description: "Batch-process containers; higher tiers auto-process fragments.",
+		description:
+			"Batch-process containers; higher tiers auto-process fragments.",
 		flavor:
 			"Expose a batch endpoint. Processing continues outside active sessions.",
 		costs: [150, 500, 1500, 4000],
@@ -172,7 +172,8 @@ export const upgrades: Record<UpgradeId, UpgradeDef> = {
 	extractAll: {
 		id: "extractAll",
 		name: "Bulk extraction",
-		description: "Adds a toolbar button to extract every ready container at once.",
+		description:
+			"Adds a toolbar button to extract every ready container at once.",
 		flavor: "A single gesture that takes everything ready. No operator prompt.",
 		costs: [200],
 		effect: (lvl) => (lvl === 0 ? "off" : "on"),
@@ -184,8 +185,7 @@ export const upgrades: Record<UpgradeId, UpgradeDef> = {
 		flavor:
 			"Schedule routine redactions. Older entries quietly stop being entries.",
 		costs: [300, 900, 2400],
-		effect: (lvl) =>
-			`${complianceHygieneDecayFor(lvl).toFixed(2)} load/s`,
+		effect: (lvl) => `${complianceHygieneDecayFor(lvl).toFixed(2)} load/s`,
 	},
 };
 

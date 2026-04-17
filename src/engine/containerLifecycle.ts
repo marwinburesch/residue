@@ -147,10 +147,7 @@ export function fragmentRestoreCost(): number {
 	return REVEAL.corruptionRestoreCost;
 }
 
-export function startProcessing(
-	state: GameState,
-	fragmentId: number,
-): boolean {
+export function startProcessing(state: GameState, fragmentId: number): boolean {
 	const fragment = findFragment(state, fragmentId);
 	if (!fragment) return false;
 	const cost = fragmentProcessCost(state, fragment);

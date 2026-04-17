@@ -60,9 +60,7 @@ export const UPGRADE_FLAVOR: Partial<Record<UpgradeId, readonly string[]>> = {
 		"[SIGNAL] Fragments resolve without ceremony.",
 		"[SIGNAL] Processing is indistinguishable from background noise.",
 	],
-	extractAll: [
-		"[SIGNAL] Bulk interface exposed. Pick-up is one gesture now.",
-	],
+	extractAll: ["[SIGNAL] Bulk interface exposed. Pick-up is one gesture now."],
 	complianceHygiene: [
 		"[SIGNAL] Redaction routines authorised. Logs self-cleanse on a schedule.",
 		"[SIGNAL] Clean-up cycles folded into routine maintenance.",

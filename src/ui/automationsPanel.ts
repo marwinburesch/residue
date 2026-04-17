@@ -80,7 +80,9 @@ function createChip(status: AutomationStatus): ChipView {
 function syncChip(chip: ChipView, status: AutomationStatus): void {
 	const remainingMs = Math.max(0, status.cooldownMs - status.elapsedMs);
 	const ready = status.progress >= 1;
-	const text = ready ? "Ready" : `${(Math.ceil(remainingMs / 100) / 10).toFixed(1)}s`;
+	const text = ready
+		? "Ready"
+		: `${(Math.ceil(remainingMs / 100) / 10).toFixed(1)}s`;
 	if (text !== chip.lastTimeText) {
 		chip.timeEl.textContent = text;
 		chip.lastTimeText = text;

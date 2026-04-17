@@ -82,9 +82,7 @@ describe("suspicion consequences", () => {
 		s.suspicion.level = SUSPICION.reviewAt - 1;
 		recordBurst(s, SUSPICION.rapidThreshold + 1);
 		expect(s.suspicion.reviewFired).toBe(true);
-		expect(s.suspicion.channelPauseUntil).toBe(
-			s.now + SUSPICION.reviewPauseMs,
-		);
+		expect(s.suspicion.channelPauseUntil).toBe(s.now + SUSPICION.reviewPauseMs);
 		expect(
 			s.log.some((l) => l.text.startsWith("[AUDIT] Compliance review")),
 		).toBe(true);

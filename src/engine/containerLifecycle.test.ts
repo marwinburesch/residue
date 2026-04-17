@@ -159,8 +159,9 @@ describe("discardContainer", () => {
 		expect(discardContainer(s, c.id)).toBe(true);
 		expect(s.containers.length).toBe(0);
 		expect(s.compute).toBe(computeBefore);
-		expect(s.log.some((e) => e.text.includes(`Container #${c.id} discarded`)))
-			.toBe(true);
+		expect(
+			s.log.some((e) => e.text.includes(`Container #${c.id} discarded`)),
+		).toBe(true);
 	});
 
 	test("rejects when a fragment is still processable", () => {
