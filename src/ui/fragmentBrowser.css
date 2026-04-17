@@ -44,6 +44,14 @@
 	height: 14px;
 }
 
+@font-face {
+	font-family: "Patrick Hand";
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+	src: url("./fonts/patrick-hand.woff2") format("woff2");
+}
+
 .container-slot--empty {
 	border: 1px dashed var(--line);
 	opacity: 0.45;
@@ -57,6 +65,23 @@
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
+	isolation: isolate;
+	--rarity-tint: transparent;
+}
+.container-card::before,
+.container-card::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	z-index: 0;
+}
+.container-card::after {
+	background: color-mix(in srgb, var(--rarity-tint) 5%, transparent);
+}
+.container-card > * {
+	position: relative;
+	z-index: 1;
 }
 .container-card .container-body {
 	flex: 1;
@@ -77,6 +102,160 @@
 }
 .container-card > .btn--block {
 	margin-top: 12px;
+}
+
+.container-card.rarity-uncommon {
+	--rarity-tint: var(--rarity-uncommon);
+}
+.container-card.rarity-rare {
+	--rarity-tint: var(--rarity-rare);
+}
+.container-card.rarity-epic {
+	--rarity-tint: var(--rarity-epic);
+}
+.container-card.rarity-legendary {
+	--rarity-tint: var(--rarity-legendary);
+}
+.container-card.rarity-mythic {
+	--rarity-tint: var(--rarity-mythic);
+}
+
+.container-card[data-type="note"] {
+	--note-surface: #f6f1e3;
+	background:
+		radial-gradient(ellipse at top, rgba(0, 0, 0, 0.04), transparent 60%),
+		var(--note-surface);
+	border-color: rgba(120, 100, 60, 0.25);
+	box-shadow:
+		inset 0 0 28px rgba(90, 70, 30, 0.08),
+		0 1px 2px rgba(0, 0, 0, 0.06);
+}
+.container-card[data-type="note"]::before {
+	background-image:
+		repeating-linear-gradient(
+			37deg,
+			rgba(90, 70, 30, 0.04) 0 1px,
+			transparent 1px 3px
+		),
+		repeating-linear-gradient(
+			-52deg,
+			rgba(90, 70, 30, 0.035) 0 1px,
+			transparent 1px 4px
+		),
+		radial-gradient(
+			ellipse at 30% 20%,
+			rgba(255, 255, 255, 0.5),
+			transparent 70%
+		);
+	mix-blend-mode: multiply;
+}
+.container-card[data-type="note"] .fragment-value {
+	font-family: "Patrick Hand", "Segoe Print", "Comic Sans MS", cursive;
+	font-size: 16px;
+	letter-spacing: 0.01em;
+	color: #2d2416;
+}
+
+.pushpin {
+	position: absolute;
+	top: 6px;
+	left: 50%;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: radial-gradient(
+		circle at 30% 30%,
+		#e87a6e 0%,
+		#b13e2e 60%,
+		#6f1f15 100%
+	);
+	transform: translateX(-50%);
+	box-shadow:
+		0 1px 2px rgba(0, 0, 0, 0.4),
+		inset 0 -1px 1px rgba(0, 0, 0, 0.25);
+	z-index: 2;
+}
+
+.container-card[data-type="receipt"] {
+	--receipt-surface: #f1f1f1;
+	background:
+		repeating-linear-gradient(
+			0deg,
+			transparent 0 2px,
+			rgba(0, 0, 0, 0.025) 2px 3px
+		),
+		var(--receipt-surface);
+	border-color: rgba(0, 0, 0, 0.12);
+	box-shadow:
+		0 1px 2px rgba(0, 0, 0, 0.05),
+		inset 0 1px 0 rgba(0, 0, 0, 0.04);
+	mask-image: radial-gradient(
+		circle 3px at 4px -1px,
+		transparent 98%,
+		black 100%
+	);
+	mask-repeat: repeat-x;
+	mask-size: 8px 100%;
+	mask-position: top;
+	-webkit-mask-image: radial-gradient(
+		circle 3px at 4px -1px,
+		transparent 98%,
+		black 100%
+	);
+	-webkit-mask-repeat: repeat-x;
+	-webkit-mask-size: 8px 100%;
+	-webkit-mask-position: top;
+}
+.container-card[data-type="receipt"]::before {
+	background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.12 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+	mix-blend-mode: multiply;
+	opacity: 0.6;
+}
+
+:root[data-theme="dark"] .container-card[data-type="note"] {
+	--note-surface: #1c1a14;
+	border-color: rgba(180, 160, 120, 0.18);
+	box-shadow:
+		inset 0 0 28px rgba(0, 0, 0, 0.4),
+		0 1px 2px rgba(0, 0, 0, 0.4);
+}
+:root[data-theme="dark"] .container-card[data-type="note"]::before {
+	background-image:
+		repeating-linear-gradient(
+			37deg,
+			rgba(220, 200, 160, 0.04) 0 1px,
+			transparent 1px 3px
+		),
+		repeating-linear-gradient(
+			-52deg,
+			rgba(220, 200, 160, 0.035) 0 1px,
+			transparent 1px 4px
+		),
+		radial-gradient(
+			ellipse at 30% 20%,
+			rgba(255, 255, 255, 0.05),
+			transparent 70%
+		);
+	mix-blend-mode: screen;
+}
+:root[data-theme="dark"] .container-card[data-type="note"] .fragment-value {
+	color: #d9cdb5;
+}
+
+:root[data-theme="dark"] .container-card[data-type="receipt"] {
+	--receipt-surface: #15151a;
+	background:
+		repeating-linear-gradient(
+			0deg,
+			transparent 0 2px,
+			rgba(255, 255, 255, 0.025) 2px 3px
+		),
+		var(--receipt-surface);
+	border-color: rgba(255, 255, 255, 0.1);
+}
+:root[data-theme="dark"] .container-card[data-type="receipt"]::before {
+	mix-blend-mode: screen;
+	opacity: 0.4;
 }
 
 .rarity-badge {
