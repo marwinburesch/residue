@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { createState } from "./state.ts";
 import {
+	acknowledgeStageTransition,
 	advanceStageIfReady,
 	canAdvance,
 	outlineProfileCount,
@@ -55,5 +56,22 @@ describe("stages", () => {
 		expect(advanceStageIfReady(s)).toBe(true);
 		expect(s.stage).toBe(1);
 		expect(advanceStageIfReady(s)).toBe(false);
+	});
+
+	test("advanceStageIfReady queues transition when stage defines one", () => {
+		const s = stateWithOutlines(20);
+		s.totalDpEarned = 500;
+		s.dp = 100;
+		s.upgrades.machineTier = 2;
+		expect(s.pendingStageTransition).toBeNull();
+		advanceStageIfReady(s);
+		expect(s.pendingStageTransition).toBe(1);
+	});
+
+	test("acknowledgeStageTransition clears the pending field", () => {
+		const s = createState(1, 0);
+		s.pendingStageTransition = 1;
+		acknowledgeStageTransition(s);
+		expect(s.pendingStageTransition).toBeNull();
 	});
 });
