@@ -1,6 +1,6 @@
-import { STAGES, stageDef, type StageId } from "../data/stageConfig.ts";
-import type { GameState } from "./state.ts";
+import { STAGES, type StageId, stageDef } from "../data/stageConfig.ts";
 import { fireMilestone } from "./milestones.ts";
+import type { GameState } from "./state.ts";
 import { upgradeLevel } from "./upgrades.ts";
 
 export function dpSpent(state: GameState): number {

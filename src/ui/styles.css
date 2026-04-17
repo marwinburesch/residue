@@ -8,5 +8,6 @@
 @import "./upgradePanel.css";
 @import "./profileRegistry.css";
 @import "./bootScreen.css";
+@import "./stageTransition.css";
 @import "./overflowMenu.css";
 @import "./auditModal.css";

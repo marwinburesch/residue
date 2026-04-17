@@ -1,25 +1,27 @@
 import { ScanEye, Toolbox } from "lucide-static";
-import { logInfo } from "../engine/state.ts";
 import {
 	extractAllReady,
 	isContainerReady,
 } from "../engine/containerLifecycle.ts";
 import { fireMilestone } from "../engine/milestones.ts";
-import { upgradeLevel } from "../engine/upgrades.ts";
+import { acknowledgeStageTransition } from "../engine/stages.ts";
+import { logInfo } from "../engine/state.ts";
 import { suspicionThrottle } from "../engine/suspicion.ts";
-import { loadOrInit, wipe } from "./storage.ts";
-import { createButton, type ButtonHandle } from "./button.ts";
-import { renderResourceBar } from "./resourceBar.ts";
-import { renderFragmentBrowser } from "./fragmentBrowser.ts";
-import { renderProfileRegistry } from "./profileRegistry.ts";
-import { renderUpgradePanel } from "./upgradePanel.ts";
-import { renderAutomationChips } from "./automationsPanel.ts";
-import { renderLog } from "./log.ts";
+import { upgradeLevel } from "../engine/upgrades.ts";
 import { renderAuditModal } from "./auditModal.ts";
-import { applyToneStage } from "./toneController.ts";
-import { mountTabs } from "./tabs.ts";
-import { mountOverflowMenu } from "./overflowMenu.ts";
+import { renderAutomationChips } from "./automationsPanel.ts";
+import { type ButtonHandle, createButton } from "./button.ts";
+import { renderFragmentBrowser } from "./fragmentBrowser.ts";
 import { startGameLoop } from "./gameLoop.ts";
+import { renderLog } from "./log.ts";
+import { mountOverflowMenu } from "./overflowMenu.ts";
+import { renderProfileRegistry } from "./profileRegistry.ts";
+import { renderResourceBar } from "./resourceBar.ts";
+import { renderStageTransition } from "./stageTransition.ts";
+import { loadOrInit, save, wipe } from "./storage.ts";
+import { mountTabs } from "./tabs.ts";
+import { applyToneStage } from "./toneController.ts";
+import { renderUpgradePanel } from "./upgradePanel.ts";
 
 export function mountApp(_root: HTMLElement): void {
 	const resourceBar = requireEl("resource-bar");
@@ -34,6 +36,7 @@ export function mountApp(_root: HTMLElement): void {
 	const overflowBtn = requireEl("overflow-btn");
 	const overflowMenu = requireEl("overflow-menu");
 	const topbar = requireEl("topbar");
+	const stageTransitionHost = requireEl("stage-transition-host");
 
 	const setTopbarH = () => {
 		document.documentElement.style.setProperty(
@@ -97,6 +100,10 @@ export function mountApp(_root: HTMLElement): void {
 
 	const render = () => {
 		applyToneStage(state.stage);
+		renderStageTransition(stageTransitionHost, state, () => {
+			acknowledgeStageTransition(state);
+			save(state, Date.now());
+		});
 		renderChannels();
 		renderResourceBar(resourceBar, state);
 		const hasUpgrade = upgradeLevel(state, "extractAll") > 0;

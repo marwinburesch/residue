@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import { createState } from "./state.ts";
 import {
 	acknowledgeStageTransition,
 	advanceStageIfReady,
 	canAdvance,
 	outlineProfileCount,
 } from "./stages.ts";
+import { createState } from "./state.ts";
 
 function stateWithOutlines(count: number) {
 	const s = createState(1, 0);
