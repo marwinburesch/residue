@@ -1,6 +1,6 @@
-import { STAGES, type StageId } from "../data/stageConfig.ts";
-import type { GameState } from "./state.ts";
+import { STAGES, type StageId, stageDef } from "../data/stageConfig.ts";
 import { fireMilestone } from "./milestones.ts";
+import type { GameState } from "./state.ts";
 import { upgradeLevel } from "./upgrades.ts";
 
 export function dpSpent(state: GameState): number {
@@ -31,5 +31,12 @@ export function advanceStageIfReady(state: GameState): boolean {
 		fireMilestone(state, "stage1Unlock");
 		state.channels.corkboard ??= { spawnAccumulator: 0 };
 	}
+	if (stageDef(next).transition) {
+		state.pendingStageTransition = next;
+	}
 	return true;
+}
+
+export function acknowledgeStageTransition(state: GameState): void {
+	state.pendingStageTransition = null;
 }

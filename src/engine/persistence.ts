@@ -21,6 +21,7 @@ export function deserialize(raw: string): GameState | null {
 			s.processAutoTimer ??= 0;
 			s.milestonesFired ??= [];
 			s.stage ??= 0;
+			s.pendingStageTransition ??= null;
 			s.suspicion.reviewFired ??= false;
 			s.suspicion.auditFired ??= false;
 			s.suspicion.resetFired ??= false;
